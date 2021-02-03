@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/joho/godotenv"
+
+	"github.com/theovidal/parcoursupbot/lib"
+	"github.com/theovidal/parcoursupbot/parcoursup"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("💾 No .env file at the root - Ignoring")
-	}
+	lib.LoadEnv(".env")
+	lib.OpenCache()
 
 	bot, err := telegram.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
 	if err != nil {
@@ -21,7 +21,7 @@ func main() {
 
 	bot.Debug = true
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	log.Println(lib.Green.Sprintf("✅ Authorized on account %s", bot.Self.UserName))
 
 	u := telegram.NewUpdate(0)
 	u.Timeout = 60
@@ -29,39 +29,13 @@ func main() {
 	updates, err := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.InlineQuery == nil {
-			continue
-		}
-
-		records := SearchRecords(update.InlineQuery.Query).Records
-
-		var results []interface{}
-		for _, record := range records {
-			messageContent := fmt.Sprintf("[%s](%s)\n%s - %s", record.Fields.Name, record.Fields.Link, record.Fields.Course, record.Fields.Specialization)
-			if record.Fields.CourseDetail != "" {
-				messageContent += " - " + record.Fields.CourseDetail
+		if update.InlineQuery != nil {
+			parcoursup.HandleRequest(bot, &update)
+		} else if update.Message.IsCommand() {
+			err := HandleCommand(bot, update, false)
+			if err != nil {
+				log.Println(lib.Red.Sprintf("‼ Error handling an event: %s", err))
 			}
-			messageContent += fmt.Sprintf("\n_%s, %s_", record.Fields.Department, record.Fields.Region)
-
-			results = append(results, telegram.InlineQueryResultArticle{
-				Type:  "article",
-				ID:    record.ID,
-				Title: fmt.Sprintf("%s - %s - %s", record.Fields.Name, record.Fields.Course, record.Fields.Specialization),
-				URL:   record.Fields.Link,
-				InputMessageContent: telegram.InputTextMessageContent{
-					Text:                  messageContent,
-					ParseMode:             "Markdown",
-					DisableWebPagePreview: false,
-				},
-			})
-		}
-
-		_, err := bot.AnswerInlineQuery(telegram.InlineConfig{
-			InlineQueryID: update.InlineQuery.ID,
-			Results:       results,
-		})
-		if err != nil {
-			log.Println(err)
 		}
 	}
 }
