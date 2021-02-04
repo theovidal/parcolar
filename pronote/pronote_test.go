@@ -22,7 +22,7 @@ func TestGetTimetable(t *testing.T) {
 	lib.LoadEnv("../.env")
 	lib.OpenCache()
 
-	response, err := GetTimetable()
+	response, err := GetTimetable(false)
 	if err != nil {
 		t.Error(err)
 	}

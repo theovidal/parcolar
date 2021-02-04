@@ -1,8 +1,10 @@
 package main
 
 import (
+	"github.com/theovidal/parcoursupbot/pronote"
 	"log"
 	"os"
+	"time"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -22,6 +24,15 @@ func main() {
 	bot.Debug = true
 
 	log.Println(lib.Green.Sprintf("✅ Authorized on account %s", bot.Self.UserName))
+
+	go func() {
+		for range time.Tick(time.Minute * 10) {
+			err := pronote.TimetableTicker(bot)
+			if err != nil {
+				log.Println(lib.Red.Sprintf("‼ Error handling timetable ticker: %s", err))
+			}
+		}
+	}()
 
 	u := telegram.NewUpdate(0)
 	u.Timeout = 60

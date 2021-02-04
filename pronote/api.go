@@ -113,7 +113,15 @@ func GetHomework() (result Response, err error) {
 	return
 }
 
-func GetTimetable() (result Response, err error) {
+func GetTimetable(todayOnly bool) (result Response, err error) {
+	from := time.Now().Format("2006-01-02")
+	var to string
+	if todayOnly {
+		to = from
+	} else {
+		to = time.Now().Add(time.Hour * 24 * 7).Format("2006-01-02")
+	}
+
 	body := ParseGraphql(fmt.Sprintf(`
 		{
 			timetable(from: "%s", to: "%s") {
@@ -127,7 +135,7 @@ func GetTimetable() (result Response, err error) {
 				remoteLesson
 			}
 		}
-	`, time.Now().Format("2006-01-02"), time.Now().Add(time.Hour*24*7).Format("2006-01-02")),
+	`, from, to),
 	)
 
 	content, err := MakeRequest("graphql", body)
