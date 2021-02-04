@@ -9,7 +9,8 @@ import (
 )
 
 var commandsList = map[string]func(bot *telegram.BotAPI, update telegram.Update, args []string) error{
-	"homework": pronote.HomeworkCommand,
+	"homework":  pronote.HomeworkCommand,
+	"timetable": pronote.TimetableCommand,
 }
 
 func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool) error {

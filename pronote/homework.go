@@ -17,6 +17,7 @@ func HomeworkCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) e
 
 	msg := telegram.NewMessage(update.Message.Chat.ID, content)
 	msg.ParseMode = "Markdown"
+	msg.DisableWebPagePreview = true
 	_, err = bot.Send(msg)
 
 	return err

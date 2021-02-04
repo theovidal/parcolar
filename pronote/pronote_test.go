@@ -17,3 +17,15 @@ func TestGetHomework(t *testing.T) {
 
 	fmt.Println(response.Data.Homeworks[0].String())
 }
+
+func TestGetTimetable(t *testing.T) {
+	lib.LoadEnv("../.env")
+	lib.OpenCache()
+
+	response, err := GetTimetable()
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(response.Data.Timetable[0].String())
+}

@@ -16,6 +16,7 @@ import (
 type Response struct {
 	Data struct {
 		Homeworks []Homework
+		Timetable []Lesson
 	}
 }
 
@@ -45,6 +46,48 @@ func (homework *Homework) String() (output string) {
 	return
 }
 
+type Lesson struct {
+	From      int
+	To        int
+	Subject   string
+	Teacher   string
+	Room      string
+	Status    string
+	Cancelled bool `json:"isCancelled"`
+	Remote    bool `json:"remoteLesson"`
+}
+
+func (lesson *Lesson) String() (output string) {
+	var emoji string
+	if lesson.Remote {
+		emoji = "🏡"
+	} else if lesson.Cancelled || lesson.Status == "Prof. absent" {
+		emoji = "🚪"
+	} else {
+		emoji = "🕑"
+	}
+	output += fmt.Sprintf(
+		"%s *%s: %s* \\(%s\\)",
+		emoji,
+		time.Unix(int64(lesson.From/1000), 0).Format("15h04"),
+		lib.ParseTelegramMessage(subjects[lesson.Subject].Name),
+		lib.ParseTelegramMessage(lesson.Teacher),
+	)
+	if lesson.Room != "" {
+		output += " — " + lib.ParseTelegramMessage(lesson.Room)
+	}
+
+	if lesson.Cancelled || lesson.Status == "Prof. absent" {
+		output = "~" + output
+		output += "~"
+	}
+	if lesson.Status != "" {
+		output += fmt.Sprintf(" `%s`", lesson.Status)
+	}
+	output += "\n"
+	return
+}
+
 func GetHomework() (result Response, err error) {
 	body := ParseGraphql(fmt.Sprintf(`
 		{
@@ -58,7 +101,33 @@ func GetHomework() (result Response, err error) {
 				}
 			}
 		}
-	`, time.Now().Format("2006/01/02"), time.Now().Add(time.Hour*24*15).Format("2006/01/02")),
+	`, time.Now().Format("2006-01-02"), time.Now().Add(time.Hour*24*15).Format("2006-01-02")),
+	)
+
+	content, err := MakeRequest("graphql", body)
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal([]byte(content), &result)
+	return
+}
+
+func GetTimetable() (result Response, err error) {
+	body := ParseGraphql(fmt.Sprintf(`
+		{
+			timetable(from: "%s", to: "%s") {
+				from
+				to
+				subject
+				teacher
+				room
+				status
+				isCancelled
+				remoteLesson
+			}
+		}
+	`, time.Now().Format("2006-01-02"), time.Now().Add(time.Hour*24*7).Format("2006-01-02")),
 	)
 
 	content, err := MakeRequest("graphql", body)
@@ -118,7 +187,6 @@ func Login() error {
 	data := make(map[string]interface{})
 	json.Unmarshal([]byte(content), &data)
 
-	fmt.Println(data["token"].(string))
 	lib.Cache.Set(context.Background(), "token", data["token"].(string), 0)
 
 	return nil

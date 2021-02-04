@@ -32,6 +32,9 @@ func main() {
 		if update.InlineQuery != nil {
 			parcoursup.HandleRequest(bot, &update)
 		} else if update.Message.IsCommand() {
+			if update.Message.From.UserName != "theovld" {
+				continue
+			}
 			err := HandleCommand(bot, update, false)
 			if err != nil {
 				log.Println(lib.Red.Sprintf("‼ Error handling an event: %s", err))
