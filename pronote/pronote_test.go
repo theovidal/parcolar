@@ -2,8 +2,9 @@ package pronote
 
 import (
 	"fmt"
-	"github.com/theovidal/parcoursupbot/lib"
 	"testing"
+
+	"github.com/theovidal/bacbot/lib"
 )
 
 func TestGetHomework(t *testing.T) {

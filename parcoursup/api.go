@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/theovidal/parcoursupbot/lib"
+	"github.com/theovidal/bacbot/lib"
 )
 
 var API_URL = "https://data.enseignementsup-recherche.gouv.fr/api/records/1.0/search/?dataset=fr-esr-parcoursup"

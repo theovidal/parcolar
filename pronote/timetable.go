@@ -2,8 +2,9 @@ package pronote
 
 import (
 	"fmt"
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"time"
+
+	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func TimetableCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) error {

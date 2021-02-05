@@ -2,8 +2,9 @@ package parcoursup
 
 import (
 	"fmt"
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
+
+	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func HandleRequest(bot *telegram.BotAPI, update *telegram.Update) {

@@ -1,8 +1,9 @@
 package lib
 
 import (
-	"github.com/joho/godotenv"
 	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func LoadEnv(path string) {

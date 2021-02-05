@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/theovidal/parcoursupbot/pronote"
 	"log"
 	"os"
 	"time"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/theovidal/parcoursupbot/lib"
-	"github.com/theovidal/parcoursupbot/parcoursup"
+	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/bacbot/parcoursup"
+	"github.com/theovidal/bacbot/pronote"
 )
 
 func main() {

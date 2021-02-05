@@ -5,7 +5,7 @@ import (
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/theovidal/parcoursupbot/pronote"
+	"github.com/theovidal/bacbot/pronote"
 )
 
 var commandsList = map[string]func(bot *telegram.BotAPI, update telegram.Update, args []string) error{

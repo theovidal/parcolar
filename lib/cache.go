@@ -1,10 +1,11 @@
 package lib
 
 import (
-	"github.com/go-redis/redis/v8"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/go-redis/redis/v8"
 )
 
 var Cache *redis.Client

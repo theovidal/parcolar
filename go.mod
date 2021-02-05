@@ -1,4 +1,4 @@
-module github.com/theovidal/parcoursupbot
+module github.com/theovidal/bacbot
 
 go 1.15
 

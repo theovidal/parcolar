@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/theovidal/parcoursupbot/lib"
+	"github.com/theovidal/bacbot/lib"
 )
 
 type Response struct {
