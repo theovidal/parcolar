@@ -13,8 +13,14 @@ func TimetableCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) 
 		return err
 	}
 
+	if len(response.Timetable) == 0 {
+		msg := telegram.NewMessage(update.Message.Chat.ID, "🍃 Aucun cours n'est prévu pour le moment.")
+		_, err = bot.Send(msg)
+		return err
+	}
+
 	days := make(map[string]string)
-	for _, lesson := range response.Data.Timetable {
+	for _, lesson := range response.Timetable {
 		day := time.Unix(int64(lesson.From/1000), 0).Format("02/01")
 
 		days[day] = days[day] + lesson.String()
@@ -38,23 +44,26 @@ func TimetableTicker(bot *telegram.BotAPI) error {
 		return err
 	}
 
-	if len(response.Data.Timetable) == 0 {
+	if len(response.Timetable) == 0 {
 		return nil
 	}
 
-	nextLesson := response.Data.Timetable[0]
+	nextLesson := response.Timetable[0]
 
-	for _, lesson := range response.Data.Timetable {
+	for _, lesson := range response.Timetable {
 		date := int64(lesson.From) / 1000
 		from := time.Now().Unix()
 		to := time.Now().Add(time.Minute * 10).Unix()
+		// from := int64(1613976780)
+		// to := int64(1613977000)
+		fmt.Println(nextLesson.From, from, to)
 
 		if nextLesson.Cancelled || nextLesson.Status == "Prof. absent" || date > to {
 			break
 		}
 
 		if date >= from && date <= to {
-			content := "🔔 *Prochain cours*\n" + lesson.String()
+			content := "*―――――― 🔔 Prochain cours ――――――*\n" + lesson.String()
 			msg := telegram.NewMessage(663102119, content)
 			msg.ParseMode = "MarkdownV2"
 			_, err := bot.Send(msg)

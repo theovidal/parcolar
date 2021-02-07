@@ -5,9 +5,8 @@ import (
 	"net/url"
 )
 
-func MakeRequest(request *http.Request) (response *http.Response, err error) {
-	response, err = http.DefaultClient.Do(request)
-	return
+func DoRequest(request *http.Request) (*http.Response, error) {
+	return http.DefaultClient.Do(request)
 }
 
 func EncodeURL(input string, params map[string]string) string {

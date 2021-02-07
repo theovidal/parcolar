@@ -1,6 +1,7 @@
 package pronote
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,10 +15,15 @@ import (
 )
 
 type Response struct {
-	Data struct {
-		Homeworks []Homework
-		Timetable []Lesson
-	}
+	Errors  []interface{}
+	Message string
+	Token   string
+	Data    PronoteData
+}
+
+type PronoteData struct {
+	Homeworks []Homework
+	Timetable []Lesson
 }
 
 type Homework struct {
@@ -88,8 +94,8 @@ func (lesson *Lesson) String() (output string) {
 	return
 }
 
-func GetHomework() (result Response, err error) {
-	body := ParseGraphql(fmt.Sprintf(`
+func GetHomework() (PronoteData, error) {
+	query := ParseGraphql(fmt.Sprintf(`
 		{
 			homeworks(from: "%s", to: "%s") {
 				description
@@ -104,25 +110,19 @@ func GetHomework() (result Response, err error) {
 	`, time.Now().Format("2006-01-02"), time.Now().Add(time.Hour*24*15).Format("2006-01-02")),
 	)
 
-	content, err := MakeRequest("graphql", body)
-	if err != nil {
-		return
-	}
-
-	err = json.Unmarshal([]byte(content), &result)
-	return
+	response, err := MakeRequest(query)
+	return response.Data, err
 }
 
-func GetTimetable(todayOnly bool) (result Response, err error) {
+func GetTimetable(todayOnly bool) (PronoteData, error) {
 	from := time.Now().Format("2006-01-02")
-	var to string
+	toTime := time.Now().Add(time.Hour * 24)
 	if todayOnly {
-		to = from
-	} else {
-		to = time.Now().Add(time.Hour * 24 * 7).Format("2006-01-02")
+		toTime.Add(time.Hour * 24 * 6)
 	}
+	to := toTime.Format("2006-01-02")
 
-	body := ParseGraphql(fmt.Sprintf(`
+	query := ParseGraphql(fmt.Sprintf(`
 		{
 			timetable(from: "%s", to: "%s") {
 				from
@@ -138,32 +138,40 @@ func GetTimetable(todayOnly bool) (result Response, err error) {
 	`, from, to),
 	)
 
-	content, err := MakeRequest("graphql", body)
-	if err != nil {
-		return
-	}
-
-	err = json.Unmarshal([]byte(content), &result)
-	return
+	response, err := MakeRequest(query)
+	return response.Data, err
 }
 
-func MakeRequest(endpoint string, query string) (content string, err error) {
+func MakeRequest(query string) (result Response, err error) {
 	request, _ := http.NewRequest(
 		"POST",
-		os.Getenv("PRONOTE_API")+"/"+endpoint,
+		os.Getenv("PRONOTE_API")+"/graphql",
 		strings.NewReader(query),
 	)
+
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Token", lib.Cache.Get(context.Background(), "token").Val())
 
 	var response *http.Response
 	for {
-		response, err = lib.MakeRequest(request)
+		var currentResult Response
+		token := lib.Cache.Get(context.Background(), "token").Val()
+		request.Header.Set("Token", token)
+
+		response, err = lib.DoRequest(request)
 		if err != nil {
 			return
 		}
+		var bytes []byte
+		bytes, _ = ioutil.ReadAll(response.Body)
+		response.Body.Close()
 
-		if response.StatusCode != 500 {
+		_ = json.Unmarshal(bytes, &currentResult)
+
+		fmt.Println(response.Request.Host, response.StatusCode, string(bytes))
+
+		fmt.Println(len(currentResult.Errors), currentResult.Message)
+		if response.StatusCode == 200 && len(currentResult.Errors) == 0 && currentResult.Message == "" {
+			result = currentResult
 			break
 		}
 
@@ -173,11 +181,6 @@ func MakeRequest(endpoint string, query string) (content string, err error) {
 		}
 	}
 
-	var bytes []byte
-	bytes, err = ioutil.ReadAll(response.Body)
-	response.Body.Close()
-
-	content = string(bytes)
 	return
 }
 
@@ -188,14 +191,27 @@ func Login() error {
 		"username": os.Getenv("PRONOTE_USER"),
 		"password": os.Getenv("PRONOTE_PASSWORD"),
 	})
-	content, err := MakeRequest("auth/login", string(query))
+
+	request, _ := http.NewRequest(
+		"POST",
+		os.Getenv("PRONOTE_API")+"/auth/login",
+		bytes.NewReader(query),
+	)
+
+	request.Header.Add("Content-Type", "application/json")
+	response, err := lib.DoRequest(request)
 	if err != nil {
 		return err
 	}
-	data := make(map[string]interface{})
-	json.Unmarshal([]byte(content), &data)
 
-	lib.Cache.Set(context.Background(), "token", data["token"].(string), 0)
+	var bytes []byte
+	bytes, _ = ioutil.ReadAll(response.Body)
+	response.Body.Close()
+
+	var result Response
+	_ = json.Unmarshal(bytes, &result)
+
+	lib.Cache.Set(context.Background(), "token", result.Token, 0)
 
 	return nil
 }

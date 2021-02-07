@@ -10,8 +10,14 @@ func HomeworkCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) e
 		return err
 	}
 
+	if len(response.Homeworks) == 0 {
+		msg := telegram.NewMessage(update.Message.Chat.ID, "🍃 Aucun devoir n'a été rédigé pour le moment.")
+		_, err = bot.Send(msg)
+		return err
+	}
+
 	content := ""
-	for _, homework := range response.Data.Homeworks {
+	for _, homework := range response.Homeworks {
 		content += homework.String()
 	}
 

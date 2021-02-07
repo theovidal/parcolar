@@ -38,7 +38,7 @@ func SearchRecords(query string) (result APIResult) {
 		}),
 		nil,
 	)
-	response, err := lib.MakeRequest(request)
+	response, err := lib.DoRequest(request)
 	if err != nil {
 		return
 	}
