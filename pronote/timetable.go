@@ -2,13 +2,17 @@ package pronote
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"github.com/theovidal/bacbot/pronote/api"
 )
 
 func TimetableCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) error {
-	response, err := GetTimetable(false)
+	response, err := api.GetTimetable(false)
 	if err != nil {
 		return err
 	}
@@ -39,7 +43,7 @@ func TimetableCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) 
 }
 
 func TimetableTicker(bot *telegram.BotAPI) error {
-	response, err := GetTimetable(false)
+	response, err := api.GetTimetable(false)
 	if err != nil {
 		return err
 	}
@@ -64,7 +68,8 @@ func TimetableTicker(bot *telegram.BotAPI) error {
 
 		if date >= from && date <= to {
 			content := "*―――――― 🔔 Prochain cours ――――――*\n" + lesson.String()
-			msg := telegram.NewMessage(663102119, content)
+			chat, _ := strconv.Atoi(os.Getenv("TELEGRAM_CHAT"))
+			msg := telegram.NewMessage(int64(chat), content)
 			msg.ParseMode = "MarkdownV2"
 			_, err := bot.Send(msg)
 			return err

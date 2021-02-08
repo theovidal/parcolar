@@ -1,11 +1,11 @@
-package pronote
+package api
 
 type Subject struct {
 	Name  string
 	Emoji string
 }
 
-var subjects = map[string]Subject{
+var Subjects = map[string]Subject{
 	// Tronc commun
 	"HISTOIRE & GEOGRAPHIE":             {Name: "Histoire-Géographie", Emoji: "🌎"},
 	"ENS. MORAL & CIVIQUE":              {Name: "EMC", Emoji: "🏛"},
@@ -33,7 +33,7 @@ type Clock struct {
 	Emoji  rune
 }
 
-var hours = []Clock{
+var Hours = []Clock{
 	// 🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛🕜🕝🕞🕟🕠🕡🕢🕣🕤🕥🕦🕧
 	{Hour: 1, Minute: 0, Emoji: '🕐'},
 	{Hour: 2, Minute: 0, Emoji: '🕐'},

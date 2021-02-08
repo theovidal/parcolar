@@ -5,28 +5,29 @@ import (
 	"testing"
 
 	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/bacbot/pronote/api"
 )
 
 func TestGetHomework(t *testing.T) {
 	lib.LoadEnv("../.env")
 	lib.OpenCache()
 
-	response, err := GetHomework()
+	response, err := api.GetHomework()
 	if err != nil {
 		t.Error(err)
 	}
 
-	fmt.Println(response.Data.Homeworks[0].String())
+	fmt.Println(response.Homeworks[0].String())
 }
 
 func TestGetTimetable(t *testing.T) {
 	lib.LoadEnv("../.env")
 	lib.OpenCache()
 
-	response, err := GetTimetable(false)
+	response, err := api.GetTimetable(false)
 	if err != nil {
 		t.Error(err)
 	}
 
-	fmt.Println(response.Data.Timetable[0].String())
+	fmt.Println(response.Timetable[0].String())
 }

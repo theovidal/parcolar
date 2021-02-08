@@ -43,7 +43,7 @@ func main() {
 		if update.InlineQuery != nil {
 			parcoursup.HandleRequest(bot, &update)
 		} else if update.Message.IsCommand() {
-			if update.Message.From.UserName != "theovld" {
+			if update.Message.From.UserName != os.Getenv("TELEGRAM_USER") {
 				continue
 			}
 			err := HandleCommand(bot, update, false)
