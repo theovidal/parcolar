@@ -2,10 +2,12 @@ package pronote
 
 import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"github.com/theovidal/bacbot/pronote/api"
 )
 
 func HomeworkCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) error {
-	response, err := GetHomework()
+	response, err := api.GetHomework()
 	if err != nil {
 		return err
 	}
@@ -22,7 +24,7 @@ func HomeworkCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) e
 	}
 
 	msg := telegram.NewMessage(update.Message.Chat.ID, content)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = "MarkdownV2"
 	msg.DisableWebPagePreview = true
 	_, err = bot.Send(msg)
 
