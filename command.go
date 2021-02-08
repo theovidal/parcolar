@@ -9,6 +9,7 @@ import (
 )
 
 var commandsList = map[string]func(bot *telegram.BotAPI, update telegram.Update, args []string) error{
+	"contents":  pronote.ContentsCommand,
 	"homework":  pronote.HomeworkCommand,
 	"timetable": pronote.TimetableCommand,
 }
