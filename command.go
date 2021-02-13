@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/theovidal/bacbot/math"
 	"strings"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -9,6 +10,10 @@ import (
 )
 
 var commandsList = map[string]func(bot *telegram.BotAPI, update telegram.Update, args []string) error{
+	// ------- Mathematics -------
+	"plot": math.PlotCommand,
+
+	// ------- Pronote -------
 	"contents":  pronote.ContentsCommand,
 	"homework":  pronote.HomeworkCommand,
 	"timetable": pronote.TimetableCommand,
