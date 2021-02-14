@@ -2,6 +2,7 @@ package pronote
 
 import (
 	"fmt"
+	"github.com/theovidal/bacbot/lib"
 	"os"
 	"strconv"
 	"time"
@@ -11,35 +12,39 @@ import (
 	"github.com/theovidal/bacbot/pronote/api"
 )
 
-func TimetableCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) error {
-	response, err := api.GetTimetable(false)
-	if err != nil {
-		return err
+func TimetableCommand() lib.Command {
+	return lib.Command{
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
+			response, err := api.GetTimetable(false)
+			if err != nil {
+				return err
+			}
+
+			if len(response.Timetable) == 0 {
+				msg := telegram.NewMessage(update.Message.Chat.ID, "🍃 Aucun cours n'est prévu pour le moment.")
+				_, err = bot.Send(msg)
+				return err
+			}
+
+			days := make(map[string]string)
+			for _, lesson := range response.Timetable {
+				day := time.Unix(int64(lesson.From/1000), 0).Format("02/01")
+
+				days[day] = days[day] + lesson.String()
+			}
+
+			var content string
+			for day, lessons := range days {
+				content += fmt.Sprintf("*―――――― %s ――――――*\n%s\n", day, lessons)
+			}
+
+			msg := telegram.NewMessage(update.Message.Chat.ID, content)
+			msg.ParseMode = "MarkdownV2"
+			_, err = bot.Send(msg)
+
+			return err
+		},
 	}
-
-	if len(response.Timetable) == 0 {
-		msg := telegram.NewMessage(update.Message.Chat.ID, "🍃 Aucun cours n'est prévu pour le moment.")
-		_, err = bot.Send(msg)
-		return err
-	}
-
-	days := make(map[string]string)
-	for _, lesson := range response.Timetable {
-		day := time.Unix(int64(lesson.From/1000), 0).Format("02/01")
-
-		days[day] = days[day] + lesson.String()
-	}
-
-	var content string
-	for day, lessons := range days {
-		content += fmt.Sprintf("*―――――― %s ――――――*\n%s\n", day, lessons)
-	}
-
-	msg := telegram.NewMessage(update.Message.Chat.ID, content)
-	msg.ParseMode = "MarkdownV2"
-	_, err = bot.Send(msg)
-
-	return err
 }
 
 func TimetableTicker(bot *telegram.BotAPI) error {
