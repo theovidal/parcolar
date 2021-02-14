@@ -13,7 +13,7 @@ func ContentsCommand(bot *telegram.BotAPI, update telegram.Update, _ []string) e
 	}
 
 	if len(response.Contents) == 0 {
-		msg := telegram.NewMessage(update.Message.Chat.ID, "🍃 Aucun contenu n'a été ajouté pour le moment.")
+		msg := telegram.NewMessage(update.Message.Chat.ID, "🍃 Aucun contenu de cours n'a été saisi pour le moment.")
 		_, err = bot.Send(msg)
 		return err
 	}

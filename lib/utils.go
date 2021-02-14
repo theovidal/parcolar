@@ -1,10 +1,18 @@
 package lib
 
 import (
+	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"regexp"
 
 	"github.com/fatih/color"
 )
+
+func Error(bot *telegram.BotAPI, update *telegram.Update, message string) error {
+	msg := telegram.NewMessage(update.Message.Chat.ID, "❌ "+message)
+	msg.ParseMode = "Markdown"
+	_, err := bot.Send(msg)
+	return err
+}
 
 func ParseTelegramMessage(input string) (output string) {
 	escape := regexp.MustCompile("[_\\*\\[\\]\\(\\)~>#\\+-=\\|{}\\.!]+")

@@ -1,7 +1,9 @@
 package math
 
 import (
+	"fmt"
 	"image/color"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -13,69 +15,88 @@ import (
 )
 
 func PlotCommand(bot *telegram.BotAPI, update telegram.Update, args []string) error {
-	chartParams := map[string]float64{
-		"x_min":   -10,
-		"x_max":   10,
-		"x_scale": 1,
-		"y_min":   -10,
-		"y_max":   10,
-		"y_scale": 1,
+	flags := map[string]interface{}{
+		"x_min":   -10.0,
+		"x_max":   10.0,
+		"x_scale": 1.0,
+		"y_min":   -10.0,
+		"y_max":   10.0,
+		"y_scale": 1.0,
+
+		"color":      "red",
+		"line_width": 1,
 	}
 	var function string
 	for index, arg := range args {
-		if strings.Contains(arg, "=") {
-			flag := strings.Split(arg, "=")
-			name := flag[0]
-
-			value, err := strconv.ParseFloat(flag[1], 64)
-			if err != nil {
-				msg := telegram.NewMessage(update.Message.Chat.ID, "❌ Merci d'indiquer des nombres décimaux en tant que paramètres du graphique.")
-				_, err := bot.Send(msg)
-				return err
-			}
-			chartParams[name] = value
-		} else {
+		if !strings.Contains(arg, "=") {
 			function = strings.Join(args[index:], " ")
 			break
 		}
+
+		parts := strings.Split(arg, "=")
+		name := parts[0]
+		flag, found := flags[name]
+		if !found {
+			return lib.Error(bot, &update, fmt.Sprintf("❌ Le paramètre `%s` est inexistant. Vérifiez son orthographe ou consultez la liste des paramètres possibles avec `/help plot`.", name))
+		}
+
+		fmt.Println(reflect.TypeOf(flag))
+
+		var value interface{}
+		switch flag.(type) {
+		case float64:
+			var err error
+			value, err = strconv.ParseFloat(parts[1], 64)
+			if err != nil {
+				return lib.Error(bot, &update, fmt.Sprintf("❌ Le paramètre `%s` attend un nombre comme valeur.", name))
+			}
+		case int:
+			var err error
+			value, err = strconv.Atoi(parts[1])
+			if err != nil {
+				return lib.Error(bot, &update, fmt.Sprintf("❌ Le paramètre `%s` attend un nombre entier comme valeur.", name))
+			}
+		case string:
+			value = parts[1]
+		default:
+			panic("Unhandled type for flag " + name)
+		}
+
+		flags[name] = value
 	}
 
 	plot := chart.ScatterChart{Title: "f(x) = " + function}
 	plot.XRange.MinMode.Fixed, plot.XRange.MaxMode.Fixed = true, true
-	plot.XRange.MinMode.Value, plot.XRange.MaxMode.Value = chartParams["x_min"], chartParams["x_max"]
+	plot.XRange.MinMode.Value, plot.XRange.MaxMode.Value = flags["x_min"].(float64), flags["x_max"].(float64)
 
 	plot.YRange.MinMode.Fixed, plot.YRange.MaxMode.Fixed = true, true
-	plot.YRange.MinMode.Value, plot.YRange.MaxMode.Value = chartParams["y_min"], chartParams["y_max"]
+	plot.YRange.MinMode.Value, plot.YRange.MaxMode.Value = flags["y_min"].(float64), flags["y_max"].(float64)
 
-	plot.XRange.TicSetting.Delta = chartParams["x_scale"]
-	plot.YRange.TicSetting.Delta = chartParams["y_scale"]
+	plot.XRange.TicSetting.Delta = flags["x_scale"].(float64)
+	plot.YRange.TicSetting.Delta = flags["y_scale"].(float64)
 
 	plot.XRange.TicSetting.Mirror = -1
 	plot.YRange.TicSetting.Mirror = -1
 
 	style := chart.Style{
 		Symbol:    'o',
-		LineColor: lib.Colors["red"],
+		LineColor: lib.Colors[flags["color"].(string)],
 		FillColor: color.NRGBA{0xff, 0x80, 0x80, 0xff},
 		LineStyle: chart.SolidLine,
-		LineWidth: 2,
+		LineWidth: flags["line_width"].(int),
 	}
 
 	_, err := govaluate.NewEvaluableExpressionWithFunctions(function, functions)
 	if err != nil {
-		msg := telegram.NewMessage(update.Message.Chat.ID, "❌ La fonction entrée est invalide : `"+err.Error()+"`.")
-		msg.ParseMode = "Markdown"
-		_, err := bot.Send(msg)
-		return err
+		return lib.Error(bot, &update, "La fonction entrée est invalide : `"+err.Error()+"`.")
 	}
 
 	config := telegram.NewMessage(update.Message.Chat.ID, "_Génération du graphique en cours..._")
 	config.ParseMode = "Markdown"
-	msg, _ := bot.Send(config)
+	waiter, _ := bot.Send(config)
 
 	plot.AddFunc("C_f", func(x float64) float64 {
 		expression, _ := govaluate.NewEvaluableExpressionWithFunctions(function, functions)
-
 		y, _ := expression.Evaluate(map[string]interface{}{"x": x})
 		return y.(float64)
 	}, chart.PlotStyleLines, style)
@@ -84,8 +105,8 @@ func PlotCommand(bot *telegram.BotAPI, update telegram.Update, args []string) er
 	photo := telegram.NewPhotoUpload(update.Message.Chat.ID, file)
 	_, err = bot.Send(photo)
 	bot.DeleteMessage(telegram.DeleteMessageConfig{
-		ChatID:    msg.Chat.ID,
-		MessageID: msg.MessageID,
+		ChatID:    waiter.Chat.ID,
+		MessageID: waiter.MessageID,
 	})
 	return err
 }
