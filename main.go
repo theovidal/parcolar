@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"time"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -15,6 +14,7 @@ import (
 func main() {
 	lib.LoadEnv(".env")
 	lib.OpenCache()
+	commandsList["help"] = HelpCommand()
 
 	bot, err := telegram.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
 	if err != nil {
@@ -25,19 +25,12 @@ func main() {
 
 	log.Println(lib.Green.Sprintf("✅ Authorized on account %s", bot.Self.UserName))
 
-	go func() {
-		for range time.Tick(time.Minute * 10) {
-			err := pronote.TimetableTicker(bot)
-			if err != nil {
-				log.Println(lib.Red.Sprintf("‼ Error handling timetable ticker: %s", err))
-			}
-		}
-	}()
+	go pronote.TimetableLoop(bot)
 
-	u := telegram.NewUpdate(0)
-	u.Timeout = 60
+	updateChannel := telegram.NewUpdate(0)
+	updateChannel.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(u)
+	updates, err := bot.GetUpdatesChan(updateChannel)
 
 	for update := range updates {
 		if update.InlineQuery != nil {
@@ -48,7 +41,7 @@ func main() {
 			}
 			err := HandleCommand(bot, update, false)
 			if err != nil {
-				log.Println(lib.Red.Sprintf("‼ Error handling an event: %s", err))
+				log.Println(lib.Red.Sprintf("‼ Error handling a command: %s", err))
 			}
 		}
 	}

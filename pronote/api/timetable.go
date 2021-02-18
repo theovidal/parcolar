@@ -51,7 +51,7 @@ func (lesson *Lesson) String() (output string) {
 func GetTimetable(todayOnly bool) (Data, error) {
 	from := time.Now().Format("2006-01-02")
 	toTime := time.Now().Add(time.Hour * 24)
-	if todayOnly {
+	if !todayOnly {
 		toTime.Add(time.Hour * 24 * 6)
 	}
 	to := toTime.Format("2006-01-02")

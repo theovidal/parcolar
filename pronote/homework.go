@@ -9,6 +9,7 @@ import (
 
 func HomeworkCommand() lib.Command {
 	return lib.Command{
+		Description: "Cette commande permet d'obtenir tous les devoirs saisis sur PRONOTE pour les 15 prochains jours.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
 			response, err := api.GetHomework()
 			if err != nil {

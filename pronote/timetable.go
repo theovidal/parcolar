@@ -3,6 +3,7 @@ package pronote
 import (
 	"fmt"
 	"github.com/theovidal/bacbot/lib"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -14,6 +15,7 @@ import (
 
 func TimetableCommand() lib.Command {
 	return lib.Command{
+		Description: "Cette commande permet d'obtenir l'emploi du temps complet sur les 7 prochains jours, avec leur statut à jour et le mode présentiel/distanciel.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
 			response, err := api.GetTimetable(false)
 			if err != nil {
@@ -44,6 +46,15 @@ func TimetableCommand() lib.Command {
 
 			return err
 		},
+	}
+}
+
+func TimetableLoop(bot *telegram.BotAPI) {
+	for range time.Tick(time.Minute * 10) {
+		err := TimetableTicker(bot)
+		if err != nil {
+			log.Println(lib.Red.Sprintf("‼ Error handling timetable ticker: %s", err))
+		}
 	}
 }
 

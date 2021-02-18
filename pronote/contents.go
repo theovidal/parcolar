@@ -9,6 +9,7 @@ import (
 
 func ContentsCommand() lib.Command {
 	return lib.Command{
+		Description: "Cette commande permet d'obtenir les contenus des cours des 5 derniers jours.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
 			response, err := api.GetContents()
 			if err != nil {
