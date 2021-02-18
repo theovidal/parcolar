@@ -15,6 +15,7 @@ import (
 
 var commandsList = map[string]lib.Command{
 	// ------- Mathematics -------
+	"calc": math.CalcCommand(),
 	"plot": math.PlotCommand(),
 
 	// ------- Pronote -------
