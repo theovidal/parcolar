@@ -22,10 +22,11 @@ func HelpCommand() lib.Command {
 			content := fmt.Sprintf("*―――――― Aide de la commande %s ――――――*\n%s", args[0], command.Description)
 
 			if len(command.Flags) > 0 {
-				content += "\n\nListe des flags :\n"
+				content += "\n\nListe des flags disponibles sur cette commande :\n"
 				for name, flag := range command.Flags {
 					content += fmt.Sprintf("• `%s` : %s _(par défaut : %v)_\n", name, flag.Description, flag.Value)
 				}
+				content += "Les flags sont à ajouter en début de commande sous la forme `nom=valeur`. Veillez à respecter le type de chacun (nombre entier, réel...)"
 			}
 
 			msg := telegram.NewMessage(update.Message.Chat.ID, content)
