@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/theovidal/bacbot/lib"
-	"github.com/theovidal/bacbot/math"
 	"strconv"
 	"strings"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
+	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/bacbot/math"
 	"github.com/theovidal/bacbot/pronote"
 )
 
@@ -54,12 +54,15 @@ func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool
 	return command.Execute(bot, &update, args, flags)
 }
 
-func ParseFlags(args []string, commandFlags map[string]interface{}) ([]string, map[string]interface{}, error) {
-	if commandFlags == nil || len(commandFlags) == 0 {
-		return args, commandFlags, nil
-	}
-
+func ParseFlags(args []string, commandFlags map[string]lib.Flag) ([]string, map[string]interface{}, error) {
 	flags := make(map[string]interface{})
+
+	if commandFlags == nil || len(commandFlags) == 0 {
+		for name, flag := range commandFlags {
+			flags[name] = flag.Value
+		}
+		return args, flags, nil
+	}
 
 	for index, arg := range args {
 		if !strings.Contains(arg, "=") {
@@ -75,7 +78,7 @@ func ParseFlags(args []string, commandFlags map[string]interface{}) ([]string, m
 		}
 
 		var value interface{}
-		switch flag.(type) {
+		switch flag.Value.(type) {
 		case float64:
 			var err error
 			value, err = strconv.ParseFloat(parts[1], 64)
@@ -97,9 +100,9 @@ func ParseFlags(args []string, commandFlags map[string]interface{}) ([]string, m
 		flags[name] = value
 	}
 
-	for flag, defaultValue := range commandFlags {
+	for flag, defaultFlag := range commandFlags {
 		if _, set := flags[flag]; !set {
-			flags[flag] = defaultValue
+			flags[flag] = defaultFlag.Value
 		}
 	}
 
