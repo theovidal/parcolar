@@ -11,7 +11,7 @@ func CheckExpression(function string) (message string) {
 		message = "Merci d'indiquer une expression mathématique."
 		return
 	}
-	_, err := govaluate.NewEvaluableExpressionWithFunctions(function, functions)
+	_, err := govaluate.NewEvaluableExpressionWithFunctions(function, availableFunctions)
 	if err != nil {
 		message = "L'expression entréee est invalide : `" + err.Error() + "`."
 	}
@@ -19,8 +19,8 @@ func CheckExpression(function string) (message string) {
 }
 
 func Evaluate(function string, x float64) float64 {
-	expression, _ := govaluate.NewEvaluableExpressionWithFunctions(function, functions)
-	variables := constants
+	expression, _ := govaluate.NewEvaluableExpressionWithFunctions(function, availableFunctions)
+	variables := availableConstants
 	variables["x"] = x
 	y, _ := expression.Evaluate(variables)
 	return y.(float64)
