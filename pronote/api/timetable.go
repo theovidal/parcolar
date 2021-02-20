@@ -7,6 +7,7 @@ import (
 	"github.com/theovidal/bacbot/lib"
 )
 
+// Lesson represents a class during a day on a specific subject
 type Lesson struct {
 	From      int
 	Subject   string
@@ -48,6 +49,7 @@ func (lesson *Lesson) String() (output string) {
 	return
 }
 
+// GetTimetable fetches the timetable for the next 7 days
 func GetTimetable(todayOnly bool) (Data, error) {
 	from := time.Now().Format("2006-01-02")
 	toTime := time.Now().Add(time.Hour * 24)
@@ -56,7 +58,7 @@ func GetTimetable(todayOnly bool) (Data, error) {
 	}
 	to := toTime.Format("2006-01-02")
 
-	query := ParseGraphql(fmt.Sprintf(`
+	query := ParseGraphQL(fmt.Sprintf(`
 		{
 			timetable(from: "%s", to: "%s") {
 				from

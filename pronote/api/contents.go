@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Content stores the content of a passed lesson
 type Content struct {
 	Title       string
 	Subject     string
@@ -33,8 +34,9 @@ func (content *Content) String() (output string) {
 	return
 }
 
+// GetContents fetches lesson contents for the past 5 days
 func GetContents() (Data, error) {
-	query := ParseGraphql(fmt.Sprintf(`
+	query := ParseGraphQL(fmt.Sprintf(`
 		{
 			contents(from: "%s", to: "%s") {
 				title
@@ -55,8 +57,10 @@ func GetContents() (Data, error) {
 	return response.Data, err
 }
 
+// Contents is a shortcut for []Content
 type Contents []Content
 
+// Reverse sorts Content objects to reverse their order in a list
 func (c Contents) Reverse() Contents {
 	for i := 0; i < len(c)/2; i++ {
 		j := len(c) - i - 1

@@ -8,8 +8,10 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// Cache is the main Redis cache of the app
 var Cache *redis.Client
 
+// OpenCache creates the Redis client and connects to the cache
 func OpenCache() {
 	db, err := strconv.Atoi(os.Getenv("CACHE_DB"))
 	if err != nil {

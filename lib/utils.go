@@ -7,6 +7,7 @@ import (
 	"github.com/fatih/color"
 )
 
+// Error sends a formatted error message in the Telegram chat
 func Error(bot *telegram.BotAPI, update *telegram.Update, message string) error {
 	msg := telegram.NewMessage(update.Message.Chat.ID, "❌ "+message)
 	msg.ParseMode = "Markdown"
@@ -14,6 +15,7 @@ func Error(bot *telegram.BotAPI, update *telegram.Update, message string) error 
 	return err
 }
 
+// ParseTelegramMessage escapes all the characters required to print MarkdownV2 content
 func ParseTelegramMessage(input string) (output string) {
 	escape := regexp.MustCompile("[_\\*\\[\\]\\(\\)~>#\\+-=\\|{}\\.!]+")
 	for _, char := range []rune(input) {

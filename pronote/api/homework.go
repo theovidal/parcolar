@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Homework defines the homework given for the next days by a teacher
 type Homework struct {
 	Description string
 	Subject     string
@@ -41,8 +42,9 @@ func (homework *Homework) String() (output string) {
 	return
 }
 
+// GetHomework fetches the homework to do for the next 15 days
 func GetHomework() (Data, error) {
-	query := ParseGraphql(fmt.Sprintf(`
+	query := ParseGraphQL(fmt.Sprintf(`
 		{
 			homeworks(from: "%s", to: "%s") {
 				description

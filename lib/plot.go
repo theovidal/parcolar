@@ -29,6 +29,7 @@ import (
 	"brown":       {0x79, 0x55, 0x48, 0xff},
 }*/
 
+// Colors defines the colors available for charts
 var Colors = []color.NRGBA{
 	{0xcd, 0xdc, 0x39, 0xff},
 	{0x03, 0xa9, 0xf4, 0xff},
@@ -47,6 +48,7 @@ var Colors = []color.NRGBA{
 	{0xff, 0xeb, 0x3b, 0xff},
 }
 
+// Plot generates the image file for a chart, ready to be sent over Telegram
 func Plot(c chart.Chart, name string) telegram.FileReader {
 	img := image.NewRGBA(image.Rect(0, 0, 1280, 720))
 	igr := imgg.AddTo(img, 0, 0, 1280, 720, color.RGBA{0xff, 0xff, 0xff, 0xff}, nil, nil)

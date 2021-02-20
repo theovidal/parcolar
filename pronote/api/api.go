@@ -13,19 +13,29 @@ import (
 	"github.com/theovidal/bacbot/lib"
 )
 
+// Response holds the data from Pronote
 type Response struct {
-	Errors  []interface{}
+	// A list of errors that could occur during the request
+	Errors []interface{}
+	// The message associated to an error
 	Message string
-	Token   string
-	Data    Data
+	// User token (if requested)
+	Token string
+	// Request data (if requested)
+	Data Data
 }
 
+// Data stores possible data from the Pronote API
 type Data struct {
+	// Homework to do for the next days
 	Homeworks []Homework
+	// Lessons during the next days
 	Timetable []Lesson
-	Contents  Contents
+	// Lesson contents written for the passed days
+	Contents Contents
 }
 
+// MakeRequest executes a GraphQL query to the Pronote API
 func MakeRequest(query string) (result Response, err error) {
 	request, _ := http.NewRequest(
 		"POST",
@@ -68,6 +78,7 @@ func MakeRequest(query string) (result Response, err error) {
 	return
 }
 
+// Login uses user's credentials to get an API token
 func Login() error {
 	query, _ := json.Marshal(map[string]string{
 		"url":      os.Getenv("PRONOTE_SERVER"),

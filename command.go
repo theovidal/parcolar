@@ -13,6 +13,7 @@ import (
 	"github.com/theovidal/bacbot/pronote"
 )
 
+// commandsList stores the commands available on the Telegram bot
 var commandsList = map[string]lib.Command{
 	// ------- Mathematics -------
 	"calc": math.CalcCommand(),
@@ -24,6 +25,7 @@ var commandsList = map[string]lib.Command{
 	"timetable": pronote.TimetableCommand(),
 }
 
+// HandleCommand parses an incoming request to execute a bot command
 func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool) error {
 	var commandName string
 	var args []string
@@ -55,6 +57,7 @@ func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool
 	return command.Execute(bot, &update, args, flags)
 }
 
+// ParseFlags extracts flags at the beginning of the command, holding customizable parameters
 func ParseFlags(args []string, commandFlags map[string]lib.Flag) ([]string, map[string]interface{}, error) {
 	flags := make(map[string]interface{})
 

@@ -12,7 +12,10 @@ type Command struct {
 	Execute func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error
 }
 
+// Flag holds the data of a command flag, that's to say an optional parameter passed at the beginning
 type Flag struct {
+	// A complete description of the flag to show in the help message
 	Description string
-	Value       interface{}
+	// Default value of the flag. Currently supported types: string, integer, float
+	Value interface{}
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/Knetic/govaluate"
 )
 
+// CheckExpression checks if a mathematical expression is valid (taking in account the syntax and available functions)
 func CheckExpression(function string) (message string) {
 	fmt.Println(function)
 	if len(function) == 0 {
@@ -18,6 +19,7 @@ func CheckExpression(function string) (message string) {
 	return
 }
 
+// Evaluate calculates f(x) for a certain function contained in an expression
 func Evaluate(function string, x float64) float64 {
 	expression, _ := govaluate.NewEvaluableExpressionWithFunctions(function, availableFunctions)
 	variables := availableConstants

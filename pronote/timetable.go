@@ -49,6 +49,7 @@ func TimetableCommand() lib.Command {
 	}
 }
 
+// TimetableLoop runs the TimetableTicker every 10 minutes, and is meant to be used in a goroutine.
 func TimetableLoop(bot *telegram.BotAPI) {
 	for range time.Tick(time.Minute * 10) {
 		err := TimetableTicker(bot)
@@ -58,6 +59,7 @@ func TimetableLoop(bot *telegram.BotAPI) {
 	}
 }
 
+// TimetableTicker periodically fetches the timetable on PRONOTE for upcoming lessons, and sends a notification if there is one in the next 10 minutes
 func TimetableTicker(bot *telegram.BotAPI) error {
 	response, err := api.GetTimetable(false)
 	if err != nil {

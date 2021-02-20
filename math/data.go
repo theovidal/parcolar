@@ -8,6 +8,7 @@ import (
 	"github.com/Knetic/govaluate"
 )
 
+// mathFunc is a short-hand helper to create a one-parameter mathematical function
 func mathFunc(handler func(x float64) float64) func(...interface{}) (interface{}, error) {
 	return func(args ...interface{}) (interface{}, error) {
 		x := args[0].(float64)
@@ -15,6 +16,7 @@ func mathFunc(handler func(x float64) float64) func(...interface{}) (interface{}
 	}
 }
 
+// mathFuncDouble is a short-hand helper to create a two-parameters mathematical function
 func mathFuncDouble(handler func(float64, float64) float64) func(...interface{}) (interface{}, error) {
 	return func(args ...interface{}) (interface{}, error) {
 		x := args[0].(float64)
@@ -23,6 +25,7 @@ func mathFuncDouble(handler func(float64, float64) float64) func(...interface{})
 	}
 }
 
+// availableFunctions lists the functions the user can use in their expressions
 var availableFunctions = map[string]govaluate.ExpressionFunction{
 	"sqrt":  mathFunc(math.Sqrt),
 	"abs":   mathFunc(math.Abs),
@@ -44,14 +47,17 @@ var availableFunctions = map[string]govaluate.ExpressionFunction{
 	"tanh": mathFunc(math.Tanh),
 }
 
+// availableConstants lists the constants the user can use in their expressions
 var availableConstants = map[string]interface{}{
 	"e":   math.E,
 	"pi":  math.Pi,
 	"phi": math.Phi,
 }
 
+// calcDisclaimer is the default disclaimer for commands that use mathematical expressions
 const calcDisclaimer = "⚠ *Tous les signes multiplier* sont obligatoires (ex: 3x => 3 \\* x) et les *puissances* sont représentées par une *double-étoile* (\\*\\*).\nLes *fonctions trigonométriques* utilisent toutes les *radians* comme unité pour les angles."
 
+// dataDocumentation holds the documentation for the available functions and constants, to use in mathematical expressions
 var dataDocumentation = func() string {
 	var functionsDescription string
 	for name := range availableFunctions {

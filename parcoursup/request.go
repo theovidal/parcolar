@@ -7,6 +7,7 @@ import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// HandleRequest processes an inline query from a user and returns the results for them to choose from
 func HandleRequest(bot *telegram.BotAPI, update *telegram.Update) {
 	records := SearchRecords(update.InlineQuery.Query).Records
 
