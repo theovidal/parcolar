@@ -2,6 +2,7 @@ package math
 
 import (
 	"fmt"
+	"github.com/theovidal/bacbot/math/lib"
 	"math"
 	"strings"
 
@@ -25,17 +26,31 @@ func mathFuncDouble(handler func(float64, float64) float64) func(...interface{})
 	}
 }
 
+// mathFuncTriple is a short-hand helper to create a three-parameters mathematical function
+func mathFuncTriple(handler func(float64, float64, float64) float64) func(...interface{}) (interface{}, error) {
+	return func(args ...interface{}) (interface{}, error) {
+		a := args[0].(float64)
+		b := args[1].(float64)
+		c := args[2].(float64)
+		return handler(a, b, c), nil
+	}
+}
+
 // availableFunctions lists the functions the user can use in their expressions
 var availableFunctions = map[string]govaluate.ExpressionFunction{
+	// Classical
 	"sqrt":  mathFunc(math.Sqrt),
 	"abs":   mathFunc(math.Abs),
 	"rem":   mathFuncDouble(math.Remainder),
 	"gamma": mathFunc(math.Gamma),
+	"fact":  mathFunc(lib.Factorial),
 
+	// Logarithmic
 	"exp": mathFunc(math.Exp),
 	"ln":  mathFunc(math.Log),
 	"log": mathFunc(math.Log10),
 
+	// Trigonometry
 	"sin":  mathFunc(math.Sin),
 	"cos":  mathFunc(math.Cos),
 	"tan":  mathFunc(math.Tan),
@@ -45,6 +60,11 @@ var availableFunctions = map[string]govaluate.ExpressionFunction{
 	"sinh": mathFunc(math.Sinh),
 	"cosh": mathFunc(math.Cosh),
 	"tanh": mathFunc(math.Tanh),
+
+	// Probabilities
+	"binomcoef": mathFuncDouble(lib.BinomialCoefficient),
+	"binomet":   mathFuncTriple(lib.BinomialXEqualTo),
+	"binomlt":   mathFuncTriple(lib.BinomialXLessThan),
 }
 
 // availableConstants lists the constants the user can use in their expressions
