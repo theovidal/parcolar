@@ -20,9 +20,10 @@ var commandsList = map[string]lib.Command{
 	"plot": math.PlotCommand(),
 
 	// ------- Pronote -------
-	"contents":  pronote.ContentsCommand(),
-	"homework":  pronote.HomeworkCommand(),
-	"timetable": pronote.TimetableCommand(),
+	"contents":       pronote.ContentsCommand(),
+	"homework":       pronote.HomeworkCommand(),
+	"timetable":      pronote.TimetableCommand(),
+	"timetablechart": pronote.TimetableChartCommand(),
 }
 
 // HandleCommand parses an incoming request to execute a bot command

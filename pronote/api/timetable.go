@@ -10,6 +10,7 @@ import (
 // Lesson represents a class during a day on a specific subject
 type Lesson struct {
 	From      int
+	To        int
 	Subject   string
 	Teacher   string
 	Room      string
@@ -50,14 +51,7 @@ func (lesson *Lesson) String() (output string) {
 }
 
 // GetTimetable fetches the timetable for the next 7 days
-func GetTimetable(todayOnly bool) (Data, error) {
-	from := time.Now().Format("2006-01-02")
-	toTime := time.Now().Add(time.Hour * 24)
-	if !todayOnly {
-		toTime.Add(time.Hour * 24 * 6)
-	}
-	to := toTime.Format("2006-01-02")
-
+func GetTimetable(from time.Time, to time.Time) (Data, error) {
 	query := ParseGraphQL(fmt.Sprintf(`
 		{
 			timetable(from: "%s", to: "%s") {
@@ -71,7 +65,7 @@ func GetTimetable(todayOnly bool) (Data, error) {
 				remoteLesson
 			}
 		}
-	`, from, to),
+	`, from.Format("2006-01-02"), to.Format("2006-01-02")),
 	)
 
 	response, err := MakeRequest(query)

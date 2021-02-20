@@ -2,14 +2,15 @@ package pronote
 
 import (
 	"fmt"
-	"github.com/theovidal/bacbot/lib"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/jinzhu/now"
 
+	"github.com/theovidal/bacbot/lib"
 	"github.com/theovidal/bacbot/pronote/api"
 )
 
@@ -17,7 +18,7 @@ func TimetableCommand() lib.Command {
 	return lib.Command{
 		Description: "Cette commande permet d'obtenir l'emploi du temps complet sur les 7 prochains jours, avec leur statut à jour et le mode présentiel/distanciel.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
-			response, err := api.GetTimetable(false)
+			response, err := api.GetTimetable(time.Now(), time.Now().Add(time.Hour*24*6))
 			if err != nil {
 				return err
 			}
@@ -61,7 +62,7 @@ func TimetableLoop(bot *telegram.BotAPI) {
 
 // TimetableTicker periodically fetches the timetable on PRONOTE for upcoming lessons, and sends a notification if there is one in the next 10 minutes
 func TimetableTicker(bot *telegram.BotAPI) error {
-	response, err := api.GetTimetable(false)
+	response, err := api.GetTimetable(now.BeginningOfDay(), now.EndOfDay())
 	if err != nil {
 		return err
 	}
