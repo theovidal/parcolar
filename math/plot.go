@@ -13,6 +13,7 @@ import (
 
 func PlotCommand() lib.Command {
 	return lib.Command{
+		Name:        "plot",
 		Description: fmt.Sprintf("Tracer des graphiques riches et complets. Vous pouvez tracer plusieurs fonctions en séparant leurs expressions par une esperluette `&`.\n%s\n\n%s", dataDocumentation, calcDisclaimer),
 		Flags: map[string]lib.Flag{
 			"x_min":   {"Valeur minimale de `x` à afficher", -10.0},
@@ -32,6 +33,13 @@ func PlotCommand() lib.Command {
 			if !exists {
 				return lib.Error(bot, update, "La couleur spécifiée n'existe pas. Vérifiez la liste des couleurs disponibles sur la page d'aide de la commande.")
 			} */
+
+			if len(args) == 0 {
+				help := telegram.NewMessage(update.Message.Chat.ID, PlotCommand().Help())
+				help.ParseMode = "Markdown"
+				_, err := bot.Send(help)
+				return err
+			}
 
 			grid := flags["grid"].(int)
 

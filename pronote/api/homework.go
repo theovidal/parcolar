@@ -2,8 +2,9 @@ package api
 
 import (
 	"fmt"
-	"github.com/theovidal/bacbot/lib"
 	"time"
+
+	"github.com/theovidal/bacbot/lib"
 )
 
 // Homework defines the homework given for the next days by a teacher

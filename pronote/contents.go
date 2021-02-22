@@ -2,13 +2,14 @@ package pronote
 
 import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/theovidal/bacbot/lib"
 
+	"github.com/theovidal/bacbot/lib"
 	"github.com/theovidal/bacbot/pronote/api"
 )
 
 func ContentsCommand() lib.Command {
 	return lib.Command{
+		Name:        "contents",
 		Description: "Cette commande permet d'obtenir les contenus des cours des 5 derniers jours.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
 			response, err := api.GetContents()

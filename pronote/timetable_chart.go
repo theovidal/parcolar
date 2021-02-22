@@ -1,7 +1,6 @@
 package pronote
 
 import (
-	"fmt"
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/jinzhu/now"
 	"github.com/vdobler/chart"
@@ -12,6 +11,8 @@ import (
 
 func TimetableChartCommand() lib.Command {
 	return lib.Command{
+		Name:        "timetable_chart",
+		Description: "Cette commande permet de tracer un diagramme en camembert (ou en quartiers) afin de visualiser le volume horaire des matières dans l'emploi du temps.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
 			// time.Unix(1613961222, 0) - time.Unix(1614393222, 0)
 			response, err := api.GetTimetable(now.BeginningOfWeek(), now.EndOfWeek())
@@ -45,8 +46,6 @@ func TimetableChartCommand() lib.Command {
 				subjects = append(subjects, subject)
 				durations = append(durations, (duration/totalDuration)*100)
 			}
-
-			fmt.Println(durations)
 
 			pie := chart.PieChart{Title: "Distribution des cours de la semaine"}
 			pie.AddDataPair("Cours", subjects, durations)

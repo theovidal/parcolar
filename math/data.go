@@ -2,11 +2,12 @@ package math
 
 import (
 	"fmt"
-	"github.com/theovidal/bacbot/math/lib"
 	"math"
 	"strings"
 
 	"github.com/Knetic/govaluate"
+
+	"github.com/theovidal/bacbot/math/lib"
 )
 
 // mathFunc is a short-hand helper to create a one-parameter mathematical function
@@ -36,6 +37,14 @@ func mathFuncTriple(handler func(float64, float64, float64) float64) func(...int
 	}
 }
 
+// degreeToRadiansFunc is a short-hand helper to create a one-parameter mathematical function and convert the passed angle from degrees to radians (go native functions only admit this unit)
+func degreeToRadiansFunc(handler func(x float64) float64) func(...interface{}) (interface{}, error) {
+	return func(args ...interface{}) (interface{}, error) {
+		x := args[0].(float64)
+		return handler(x * math.Pi / 180), nil
+	}
+}
+
 // availableFunctions lists the functions the user can use in their expressions
 var availableFunctions = map[string]govaluate.ExpressionFunction{
 	// Classical
@@ -50,7 +59,7 @@ var availableFunctions = map[string]govaluate.ExpressionFunction{
 	"ln":  mathFunc(math.Log),
 	"log": mathFunc(math.Log10),
 
-	// Trigonometry
+	// Trigonometry (radians)
 	"sin":  mathFunc(math.Sin),
 	"cos":  mathFunc(math.Cos),
 	"tan":  mathFunc(math.Tan),
@@ -60,6 +69,17 @@ var availableFunctions = map[string]govaluate.ExpressionFunction{
 	"sinh": mathFunc(math.Sinh),
 	"cosh": mathFunc(math.Cosh),
 	"tanh": mathFunc(math.Tanh),
+
+	// Trigonometry (degrees)
+	"dsin":  degreeToRadiansFunc(math.Sin),
+	"dcos":  degreeToRadiansFunc(math.Cos),
+	"dtan":  degreeToRadiansFunc(math.Tan),
+	"dasin": degreeToRadiansFunc(math.Asin),
+	"dacos": degreeToRadiansFunc(math.Acos),
+	"datan": degreeToRadiansFunc(math.Atan),
+	"dsinh": degreeToRadiansFunc(math.Sinh),
+	"dcosh": degreeToRadiansFunc(math.Cosh),
+	"dtanh": degreeToRadiansFunc(math.Tanh),
 
 	// Probabilities
 	"binomcoef": mathFuncDouble(lib.BinomialCoefficient),
@@ -75,7 +95,7 @@ var availableConstants = map[string]interface{}{
 }
 
 // calcDisclaimer is the default disclaimer for commands that use mathematical expressions
-const calcDisclaimer = "⚠ *Tous les signes multiplier* sont obligatoires (ex: 3x => 3 \\* x) et les *puissances* sont représentées par une *double-étoile* (\\*\\*).\nLes *fonctions trigonométriques* utilisent toutes les *radians* comme unité pour les angles."
+const calcDisclaimer = "⚠ *Tous les signes multiplier* sont obligatoires (ex: 3x => 3 \\* x) et les *puissances* sont représentées par une *double-étoile* (\\*\\*).\nLes *fonctions trigonométriques non précédées de la lettre `d` utilisent les *radians* comme unité pour les angles."
 
 // dataDocumentation holds the documentation for the available functions and constants, to use in mathematical expressions
 var dataDocumentation = func() string {

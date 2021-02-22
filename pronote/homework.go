@@ -2,13 +2,14 @@ package pronote
 
 import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/theovidal/bacbot/lib"
 
+	"github.com/theovidal/bacbot/lib"
 	"github.com/theovidal/bacbot/pronote/api"
 )
 
 func HomeworkCommand() lib.Command {
 	return lib.Command{
+		Name:        "homework",
 		Description: "Cette commande permet d'obtenir tous les devoirs saisis sur PRONOTE pour les 15 prochains jours.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
 			response, err := api.GetHomework()

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/jinzhu/now"
+
 	"github.com/theovidal/bacbot/lib"
 	"github.com/theovidal/bacbot/pronote/api"
 )
@@ -24,7 +26,7 @@ func TestGetTimetable(t *testing.T) {
 	lib.LoadEnv("../.env")
 	lib.OpenCache()
 
-	response, err := api.GetTimetable(false)
+	response, err := api.GetTimetable(now.BeginningOfWeek(), now.EndOfWeek())
 	if err != nil {
 		t.Error(err)
 	}

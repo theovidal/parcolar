@@ -1,17 +1,11 @@
 package math
 
 import (
-	"fmt"
 	"github.com/Knetic/govaluate"
 )
 
 // CheckExpression checks if a mathematical expression is valid (taking in account the syntax and available functions)
 func CheckExpression(function string) (message string) {
-	fmt.Println(function)
-	if len(function) == 0 {
-		message = "Merci d'indiquer une expression mathématique."
-		return
-	}
 	_, err := govaluate.NewEvaluableExpressionWithFunctions(function, availableFunctions)
 	if err != nil {
 		message = "L'expression entréee est invalide : `" + err.Error() + "`."
