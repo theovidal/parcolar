@@ -2,13 +2,9 @@ package pronote
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"strconv"
 	"time"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/jinzhu/now"
 
 	"github.com/theovidal/bacbot/lib"
 	"github.com/theovidal/bacbot/pronote/api"
@@ -16,6 +12,7 @@ import (
 
 func TimetableCommand() lib.Command {
 	return lib.Command{
+		Name:        "timetable",
 		Description: "Cette commande permet d'obtenir l'emploi du temps complet sur les 7 prochains jours, avec leur statut à jour et le mode présentiel/distanciel.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
 			response, err := api.GetTimetable(time.Now(), time.Now().Add(time.Hour*24*6))
@@ -48,52 +45,4 @@ func TimetableCommand() lib.Command {
 			return err
 		},
 	}
-}
-
-// TimetableLoop runs the TimetableTicker every 10 minutes, and is meant to be used in a goroutine.
-func TimetableLoop(bot *telegram.BotAPI) {
-	for range time.Tick(time.Minute * 10) {
-		err := TimetableTicker(bot)
-		if err != nil {
-			log.Println(lib.Red.Sprintf("‼ Error handling timetable ticker: %s", err))
-		}
-	}
-}
-
-// TimetableTicker periodically fetches the timetable on PRONOTE for upcoming lessons, and sends a notification if there is one in the next 10 minutes
-func TimetableTicker(bot *telegram.BotAPI) error {
-	response, err := api.GetTimetable(now.BeginningOfDay(), now.EndOfDay())
-	if err != nil {
-		return err
-	}
-
-	if len(response.Timetable) == 0 {
-		return nil
-	}
-
-	nextLesson := response.Timetable[0]
-
-	for _, lesson := range response.Timetable {
-		date := int64(lesson.From) / 1000
-		from := time.Now().Unix()
-		to := time.Now().Add(time.Minute * 10).Unix()
-		// from := int64(1613976780)
-		// to := int64(1613977000)
-		fmt.Println(nextLesson.From, from, to)
-
-		if nextLesson.Cancelled || nextLesson.Status == "Prof. absent" || date > to {
-			break
-		}
-
-		if date >= from && date <= to {
-			content := "*―――――― 🔔 Prochain cours ――――――*\n" + lesson.String()
-			chat, _ := strconv.Atoi(os.Getenv("TELEGRAM_CHAT"))
-			msg := telegram.NewMessage(int64(chat), content)
-			msg.ParseMode = "MarkdownV2"
-			_, err := bot.Send(msg)
-			return err
-		}
-	}
-
-	return nil
 }
