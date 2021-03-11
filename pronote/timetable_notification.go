@@ -34,13 +34,16 @@ func TimetableTicker(bot *telegram.BotAPI) error {
 		return nil
 	}
 
-	// from := int64(1613991475)
-	// to := int64(1613992075)
+	// from := int64(1615453020)
+	// to := int64(1615453620)
 	from := time.Now().Unix()
 	to := time.Now().Add(time.Minute * 10).Unix()
 
 	for _, lesson := range response.Timetable {
 		date := int64(lesson.From) / 1000
+		if os.Getenv("PRONOTE_TIMEZONE") != "UTC" {
+			date -= 3600
+		}
 
 		if date > to {
 			break
