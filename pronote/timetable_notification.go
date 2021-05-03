@@ -1,6 +1,7 @@
 package pronote
 
 import (
+	"errors"
 	"log"
 	"os"
 	"strconv"
@@ -34,16 +35,15 @@ func TimetableTicker(bot *telegram.BotAPI) error {
 		return nil
 	}
 
-	// from := int64(1615453020)
-	// to := int64(1615453620)
 	from := time.Now().Unix()
 	to := time.Now().Add(time.Minute * 10).Unix()
 
 	for _, lesson := range response.Timetable {
-		date := int64(lesson.From) / 1000
-		if os.Getenv("PRONOTE_TIMEZONE") != "UTC" {
-			date -= 3600
+		location, err := time.LoadLocation(os.Getenv("PRONOTE_TIMEZONE"))
+		if err != nil {
+			return errors.New("Can't get timezone " + err.Error() + " (from PRONOTE_TIMEZONE environment variable)")
 		}
+		date := time.Unix(int64(lesson.From)/1000, 0).In(location).Unix()
 
 		if date > to {
 			break
