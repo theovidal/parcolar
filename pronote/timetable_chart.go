@@ -14,10 +14,9 @@ func TimetableChartCommand() lib.Command {
 		Name:        "timetable_chart",
 		Description: "Cette commande permet de tracer un diagramme en camembert (ou en quartiers) afin de visualiser le volume horaire des matières dans l'emploi du temps.",
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
-			// time.Unix(1613961222, 0) - time.Unix(1614393222, 0)
 			response, err := api.GetTimetable(now.BeginningOfWeek(), now.EndOfWeek())
 			if err != nil {
-				return err
+				return lib.Error(bot, update, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Timetable) == 0 {

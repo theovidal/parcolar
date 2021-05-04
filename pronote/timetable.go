@@ -17,7 +17,7 @@ func TimetableCommand() lib.Command {
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
 			response, err := api.GetTimetable(time.Now(), time.Now().Add(time.Hour*24*6))
 			if err != nil {
-				return err
+				return lib.Error(bot, update, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Timetable) == 0 {

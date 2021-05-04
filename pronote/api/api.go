@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -36,7 +37,7 @@ type Data struct {
 }
 
 // MakeRequest executes a GraphQL query to the Pronote API
-func MakeRequest(query string) (result Response, err error) {
+func MakeRequest(query string) (Response, error) {
 	request, _ := http.NewRequest(
 		"POST",
 		os.Getenv("PRONOTE_API")+"/graphql",
@@ -45,37 +46,34 @@ func MakeRequest(query string) (result Response, err error) {
 
 	request.Header.Add("Content-Type", "application/json")
 
-	var response *http.Response
-	for {
-		var currentResult Response
+	for i := 0; i < 3; i++ {
+		var result Response
 		token := lib.Cache.Get(context.Background(), "token").Val()
 		request.Header.Set("Token", token)
 
-		response, err = lib.DoRequest(request)
+		response, err := lib.DoRequest(request)
 		if err != nil {
-			return
+			return Response{}, err
 		}
 		var bytes []byte
 		bytes, _ = ioutil.ReadAll(response.Body)
 		response.Body.Close()
 
-		_ = json.Unmarshal(bytes, &currentResult)
+		_ = json.Unmarshal(bytes, &result)
 
 		fmt.Println(response.Request.Host, response.StatusCode, string(bytes))
 
-		fmt.Println(len(currentResult.Errors), currentResult.Message)
-		if response.StatusCode == 200 && len(currentResult.Errors) == 0 && currentResult.Message == "" {
-			result = currentResult
-			break
+		if response.StatusCode == 200 && len(result.Errors) == 0 && result.Message == "" {
+			return result, nil
 		}
 
 		err = Login()
 		if err != nil {
-			return
+			return Response{}, err
 		}
 	}
 
-	return
+	return Response{}, errors.New("unable to make request after 3 trials")
 }
 
 // Login uses user's credentials to get an API token

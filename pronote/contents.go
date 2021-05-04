@@ -16,7 +16,7 @@ func ContentsCommand() lib.Command {
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
 			response, err := api.GetContents()
 			if err != nil {
-				return lib.Error(bot, update, "Erreur serveur : impossible d'effectuer la requête.")
+				return lib.Error(bot, update, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Contents) == 0 {

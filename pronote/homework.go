@@ -14,7 +14,7 @@ func HomeworkCommand() lib.Command {
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
 			response, err := api.GetHomework()
 			if err != nil {
-				return err
+				return lib.Error(bot, update, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Homeworks) == 0 {
