@@ -1,6 +1,8 @@
 package pronote
 
 import (
+	"strings"
+
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/theovidal/bacbot/lib"
@@ -14,7 +16,7 @@ func ContentsCommand() lib.Command {
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) error {
 			response, err := api.GetContents()
 			if err != nil {
-				return err
+				return lib.Error(bot, update, "Erreur serveur : impossible d'effectuer la requête.")
 			}
 
 			if len(response.Contents) == 0 {
@@ -23,12 +25,12 @@ func ContentsCommand() lib.Command {
 				return err
 			}
 
-			output := ""
+			var output []string
 			for _, content := range response.Contents.Reverse() {
-				output += content.String()
+				output = append(output, content.String())
 			}
 
-			msg := telegram.NewMessage(update.Message.Chat.ID, output)
+			msg := telegram.NewMessage(update.Message.Chat.ID, strings.Join(output, "―――――――――\n"))
 			msg.ParseMode = "Markdown"
 			msg.DisableWebPagePreview = true
 			_, err = bot.Send(msg)

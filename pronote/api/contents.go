@@ -7,10 +7,16 @@ import (
 
 // Content stores the content of a passed lesson
 type Content struct {
-	Title       string
-	Subject     string
-	Teachers    string
-	Time        int `json:"from"`
+	Subject  string
+	Teachers string
+	Time     int `json:"from"`
+	Contents []ContentPart
+}
+
+// ContentPart stores the different parts of a lesson
+type ContentPart struct {
+	Name        string
+	Category    string
 	Description string
 	Files       []File
 }
@@ -23,14 +29,20 @@ func (content *Content) String() (output string) {
 		subject.Name,
 		time.Unix(int64(content.Time/1000), 0).Format("02/01"),
 	)
-	if content.Title != "" {
-		output += fmt.Sprintf("_« %s »_\n", content.Title)
+
+	for _, part := range content.Contents {
+		if part.Category != "" {
+			output += fmt.Sprintf("*« %s »* ", part.Category)
+		}
+		output += part.Description + "\n"
+		for _, file := range part.Files {
+			output += file.String()
+		}
+		output += "\n"
 	}
-	output += content.Description + "\n"
-	for _, file := range content.Files {
-		output += file.String()
+	if len(content.Contents) == 0 {
+		output += "\n"
 	}
-	output += "\n\n"
 	return
 }
 
@@ -39,14 +51,20 @@ func GetContents() (Data, error) {
 	query := ParseGraphQL(fmt.Sprintf(`
 		{
 			contents(from: "%s", to: "%s") {
-				title
 				subject
 				teachers
 				from
-				description
-				files {
+				to
+				color
+				contents {
 					name
-					url
+					category
+					htmlDescription
+					description
+					files {
+						name
+						url
+					}
 				}
 			}
 		}
