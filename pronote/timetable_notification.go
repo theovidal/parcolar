@@ -35,15 +35,16 @@ func TimetableTicker(bot *telegram.BotAPI) error {
 		return nil
 	}
 
-	from := time.Now().Unix()
-	to := time.Now().Add(time.Minute * 10).Unix()
+	location, err := time.LoadLocation(os.Getenv("PRONOTE_TIMEZONE"))
+	if err != nil {
+		return errors.New("Can't get timezone " + err.Error() + " (from PRONOTE_TIMEZONE environment variable)")
+	}
+
+	from := time.Now().In(location).Unix()
+	to := time.Now().In(location).Add(time.Minute * 10).Unix()
 
 	for _, lesson := range response.Timetable {
-		location, err := time.LoadLocation(os.Getenv("PRONOTE_TIMEZONE"))
-		if err != nil {
-			return errors.New("Can't get timezone " + err.Error() + " (from PRONOTE_TIMEZONE environment variable)")
-		}
-		date := time.Unix(int64(lesson.From)/1000, 0).In(location).Unix()
+		date := int64(lesson.From) / 1000
 
 		if date > to {
 			break
