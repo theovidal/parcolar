@@ -8,6 +8,7 @@ import (
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
+	"github.com/theovidal/bacbot/info"
 	"github.com/theovidal/bacbot/lib"
 	"github.com/theovidal/bacbot/math"
 	"github.com/theovidal/bacbot/pronote"
@@ -15,11 +16,15 @@ import (
 
 // commandsList stores the commands available on the Telegram bot
 var commandsList = map[string]lib.Command{
-	// ------- Mathematics -------
+	// ―――――― Information ――――――
+	"definition":  info.DefinitionCommand(),
+	"translation": info.TranslationCommand(),
+
+	// ―――――― Mathematics ――――――
 	"calc": math.CalcCommand(),
 	"plot": math.PlotCommand(),
 
-	// ------- Pronote -------
+	// ―――――― Pronote ――――――
 	"contents":       pronote.ContentsCommand(),
 	"homework":       pronote.HomeworkCommand(),
 	"timetable":      pronote.TimetableCommand(),
