@@ -11,7 +11,7 @@ import (
 	"github.com/vdobler/chart/imgg"
 )
 
-/*var Colors = map[string]color.NRGBA{
+/* var Colors = map[string]color.NRGBA{
 	"red":         {0xf4, 0x43, 0x36, 0xff},
 	"pink":        {0xe9, 0x1e, 0x63, 0xff},
 	"purple":      {0x9c, 0x27, 0xb0, 0xff},
@@ -27,7 +27,7 @@ import (
 	"amber":       {0xff, 0xc1, 0x07, 0xff},
 	"orange":      {0xff, 0x98, 0x00, 0xff},
 	"brown":       {0x79, 0x55, 0x48, 0xff},
-}*/
+} */
 
 // Colors defines the colors available for charts
 var Colors = []color.NRGBA{
@@ -51,7 +51,7 @@ var Colors = []color.NRGBA{
 // Plot generates the image file for a chart, ready to be sent over Telegram
 func Plot(c chart.Chart, name string) telegram.FileReader {
 	img := image.NewRGBA(image.Rect(0, 0, 1280, 720))
-	igr := imgg.AddTo(img, 0, 0, 1280, 720, color.RGBA{0xff, 0xff, 0xff, 0xff}, nil, nil)
+	igr := imgg.AddTo(img, 0, 0, 1280, 720, color.RGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}, nil, nil)
 	c.Plot(igr)
 
 	writer := bytes.NewBuffer(nil)

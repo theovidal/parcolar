@@ -27,12 +27,14 @@ func CalcCommand() lib.Command {
 			}
 
 			function := strings.Join(args, " ")
-			msg := CheckExpression(function)
-			if msg != "" {
-				return lib.Error(bot, update, msg)
+			if err := CheckExpression(function); err != nil {
+				return lib.Error(bot, update, err.Error())
 			}
 
-			value := Evaluate(function, 1.0)
+			value, err := Evaluate(function, 1.0)
+			if err != nil {
+				return lib.Error(bot, update, err.Error())
+			}
 
 			format := "= %." + strconv.Itoa(flags["sf"].(int))
 			if flags["sci"].(int) == 1 {
@@ -40,7 +42,7 @@ func CalcCommand() lib.Command {
 			} else {
 				format += "f"
 			}
-			_, err := bot.Send(telegram.NewMessage(update.Message.Chat.ID, fmt.Sprintf(format, value)))
+			_, err = bot.Send(telegram.NewMessage(update.Message.Chat.ID, fmt.Sprintf(format, value)))
 			return err
 		},
 	}

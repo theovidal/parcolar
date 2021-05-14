@@ -14,7 +14,7 @@ import (
 func PlotCommand() lib.Command {
 	return lib.Command{
 		Name:        "plot",
-		Description: fmt.Sprintf("Tracer des graphiques riches et complets. Vous pouvez tracer plusieurs fonctions en séparant leurs expressions par une esperluette `&`.\n%s\n\n%s", dataDocumentation, calcDisclaimer),
+		Description: fmt.Sprintf("Tracer des graphiques riches et personnalisés. Vous pouvez tracer plusieurs fonctions en séparant leurs expressions par une esperluette `&`.\n%s\n\n%s", dataDocumentation, calcDisclaimer),
 		Flags: map[string]lib.Flag{
 			"x_min":   {"Valeur minimale de `x` à afficher", -10.0},
 			"x_max":   {"Valeur maximale de `x` à afficher", 10.0},
@@ -23,6 +23,7 @@ func PlotCommand() lib.Command {
 			"y_max":   {"Valeur maximale de `y` à afficher", 10.0},
 			"y_scale": {"Pas pour l'ordonnée", 1.0},
 
+			// TODO: color choice with multiple functions
 			// "color":      {"Couleur de la courbe : `red`, `pink`, `purple`, `indigo`, `blue`, `light_blue`, `cyan`, `teal`, `green`, `light_green`, `lime`, `yellow`, `amber`, `orange`, `brown`.", "red"},
 			"line_width": {"Épaisseur de la courbe (en pixels)", 1},
 
@@ -67,15 +68,17 @@ func PlotCommand() lib.Command {
 
 			style := chart.Style{
 				Symbol:    'o',
-				FillColor: color.NRGBA{0xff, 0x80, 0x80, 0xff},
+				FillColor: color.NRGBA{R: 0xff, G: 0x80, B: 0x80, A: 0xff},
 				LineStyle: chart.SolidLine,
 				LineWidth: flags["line_width"].(int),
 			}
 
 			for _, function := range functions {
-				msg := CheckExpression(function)
-				if msg != "" {
-					return lib.Error(bot, update, msg)
+				if err := CheckExpression(function); err != nil {
+					return lib.Error(bot, update, err.Error())
+				}
+				if _, err := Evaluate(function, 1); err != nil {
+					return lib.Error(bot, update, err.Error())
 				}
 			}
 
@@ -93,14 +96,18 @@ func PlotCommand() lib.Command {
 				colorNumber++
 
 				plot.AddFunc(current, func(x float64) float64 {
-					return Evaluate(current, x)
+					value, _ := Evaluate(current, x)
+					return value
 				}, chart.PlotStyleLines, style)
 			}
 
 			file := lib.Plot(&plot, "function_plot")
 			photo := telegram.NewPhotoUpload(update.Message.Chat.ID, file)
 			_, err := bot.Send(photo)
-			bot.DeleteMessage(telegram.DeleteMessageConfig{
+			if err != nil {
+				return err
+			}
+			_, err = bot.DeleteMessage(telegram.DeleteMessageConfig{
 				ChatID:    waiter.Chat.ID,
 				MessageID: waiter.MessageID,
 			})

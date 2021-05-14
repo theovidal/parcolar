@@ -95,7 +95,7 @@ var availableConstants = map[string]interface{}{
 }
 
 // calcDisclaimer is the default disclaimer for commands that use mathematical expressions
-const calcDisclaimer = "⚠ *Tous les signes multiplier* sont obligatoires (ex: 3x => 3 \\* x) et les *puissances* sont représentées par une *double-étoile* (\\*\\*).\nLes *fonctions trigonométriques non précédées de la lettre `d` utilisent les *radians* comme unité pour les angles."
+const calcDisclaimer = "⚠ *Tous les signes multiplier* sont obligatoires (ex: 3x => 3 \\* x) et les *puissances* sont représentées par une *double-étoile* (\\*\\*).\nLes *fonctions trigonométriques* non précédées de la lettre `d` utilisent les *radians* comme unité pour les angles."
 
 // dataDocumentation holds the documentation for the available functions and constants, to use in mathematical expressions
 var dataDocumentation = func() string {
