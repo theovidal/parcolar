@@ -17,8 +17,8 @@ import (
 // commandsList stores the commands available on the Telegram bot
 var commandsList = map[string]lib.Command{
 	// ―――――― Information ――――――
-	"definition":  info.DefinitionCommand(),
-	"translation": info.TranslationCommand(),
+	"definition":    info.DefinitionCommand(),
+	"wordreference": info.WordReferenceCommand(),
 
 	// ―――――― Mathematics ――――――
 	"calc": math.CalcCommand(),

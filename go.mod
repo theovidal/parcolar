@@ -12,4 +12,5 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/vdobler/chart v1.0.0
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
 )
