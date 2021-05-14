@@ -18,6 +18,7 @@ import (
 var commandsList = map[string]lib.Command{
 	// ―――――― Information ――――――
 	"definition":    info.DefinitionCommand(),
+	"translate":     info.TranslateCommand(),
 	"wordreference": info.WordReferenceCommand(),
 
 	// ―――――― Mathematics ――――――

@@ -17,9 +17,9 @@ func WordReferenceCommand() lib.Command {
 	return lib.Command{
 		Name:        "translation",
 		Description: "Obtenir la traduction d'un terme ou d'une expression (WordReference)",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, _ map[string]interface{}) error {
 			if len(args) < 3 {
-				return lib.Error(bot, update, "Merci d'indiquer les deux langues ainsi que le terme à traduire.")
+				return lib.Error(bot, update, "Indiquez les deux langues ainsi que le terme à traduire.")
 			}
 			from := args[0]
 			to := args[1]
@@ -48,7 +48,7 @@ func WordReferenceCommand() lib.Command {
 			}
 
 			parts := []string{
-				fmt.Sprintf("*―――――― 💱 %s → %s ――――――*", search, strings.ToUpper(to)),
+				fmt.Sprintf("*―――――― 📚 %s → %s ――――――*", search, strings.ToUpper(to)),
 			}
 			var part int
 
