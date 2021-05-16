@@ -3,22 +3,30 @@ package info
 import (
 	"encoding/json"
 	"fmt"
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 
+	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
+
 	"github.com/theovidal/bacbot/lib"
 )
 
+// DeeplUrl is the endpoint to the translation API
+const DeeplUrl = "https://api-free.deepl.com/v2/translate"
+
+// DeeplResponse stores the response from DeepL API
 type DeeplResponse struct {
 	Translations []Translation
 }
 
+// Translation represents the translation of a sentence or more from a certain language
 type Translation struct {
+	// The language from which the text was translated (usually automatically determined by DeepL)
 	SourceLanguage string `json:"detected_source_language"`
-	Text           string
+	// The translated text
+	Text string
 }
 
 func TranslateCommand() lib.Command {
@@ -46,7 +54,7 @@ func TranslateCommand() lib.Command {
 
 			request, _ := http.NewRequest(
 				"GET",
-				lib.EncodeURL("https://api-free.deepl.com/v2/translate", map[string]string{
+				lib.EncodeURL(DeeplUrl, map[string]string{
 					"auth_key":    os.Getenv("DEEPL_KEY"),
 					"text":        text,
 					"source_lang": from,
@@ -90,6 +98,7 @@ func TranslateCommand() lib.Command {
 	}
 }
 
+// sourceLanguages stores keys and flags for supported languages as sources
 var sourceLanguages = map[string]string{
 	"BG": "🇧🇬",
 	"CS": "🇨🇿",
@@ -117,6 +126,7 @@ var sourceLanguages = map[string]string{
 	"ZH": "🇨🇳",
 }
 
+// targetLanguages stores keys and flags for supported languages as targets
 var targetLanguages = func() (output map[string]string) {
 	output = map[string]string{
 		"EN-GB": "🇬🇧",
@@ -133,6 +143,7 @@ var targetLanguages = func() (output map[string]string) {
 var sourceLanguagesDoc = generateDoc(sourceLanguages)
 var targetLanguagesDoc = generateDoc(targetLanguages)
 
+// generateDoc generates the documentation text for languages list
 func generateDoc(input map[string]string) string {
 	var languages []string
 	for lang := range input {

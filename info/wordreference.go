@@ -13,6 +13,9 @@ import (
 	"github.com/theovidal/bacbot/lib"
 )
 
+// WordReferenceUrl is the endpoint to the translation dictionary
+const WordReferenceUrl = "https://www.wordreference.com"
+
 func WordReferenceCommand() lib.Command {
 	return lib.Command{
 		Name:        "translation",
@@ -25,38 +28,39 @@ func WordReferenceCommand() lib.Command {
 			to := args[1]
 			search := strings.Join(args[2:], " ")
 
-			res, err := http.Get(fmt.Sprintf("https://www.wordreference.com/%s%s/%s", from, to, search))
+			response, err := http.Get(fmt.Sprintf("%s/%s%s/%s", WordReferenceUrl, from, to, search))
 			if err != nil {
 				log.Fatal(err)
 			}
-			defer res.Body.Close()
-			if res.StatusCode == 404 {
+			defer response.Body.Close()
+
+			if response.StatusCode == 404 {
 				return lib.Error(bot, update, "La combinaison de langues est inconnue.")
 			}
-			if res.StatusCode != 200 {
+			if response.StatusCode != 200 {
 				return lib.Error(bot, update, "Une erreur inconnue s'est produite lors de la recherche dans le dictionnaire.")
 			}
 
-			doc, err := goquery.NewDocumentFromReader(res.Body)
+			document, err := goquery.NewDocumentFromReader(response.Body)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			selection := doc.Find("table.WRD tbody tr:not(.wrtopsection,.langHeader)")
+			selection := document.Find("table.WRD tbody tr:not(.wrtopsection,.langHeader)")
 			if selection.Length() == 0 {
 				return lib.Error(bot, update, "Aucune traduction trouvée pour ce terme ou cette expression.")
 			}
 
-			parts := []string{
+			messages := []string{
 				fmt.Sprintf("*―――――― 📚 %s → %s ――――――*", search, strings.ToUpper(to)),
 			}
-			var part int
+			var messageIndex int
 
 			selection.Each(func(_ int, element *goquery.Selection) {
 				var content string
 				if _, exists := element.Attr("id"); exists {
 					element.Children().Each(func(_ int, child *goquery.Selection) {
-						text, pronouns := ExtractText(child.Nodes[0])
+						text, pronouns := ExtractTranslationText(child.Nodes[0])
 						word := fmt.Sprintf("*%s* _%s_", text, pronouns)
 
 						if class, _ := child.Attr("class"); class == "FrWrd" || class == "FrEx" {
@@ -69,21 +73,21 @@ func WordReferenceCommand() lib.Command {
 					})
 				} else {
 					if element.Children().Length() == 3 {
-						text, pronouns := ExtractText(element.Children().Get(2))
+						text, pronouns := ExtractTranslationText(element.Children().Get(2))
 						content += fmt.Sprintf("\n     *%s* _%s_", text, pronouns)
 					} else {
 						content += fmt.Sprintf("\n_%s_", element.Text())
 					}
 				}
 
-				if len(parts[part]+content) > 2000 {
-					part += 1
-					parts = append(parts, "")
+				if len(messages[messageIndex]+content) > 2000 {
+					messageIndex += 1
+					messages = append(messages, "")
 				}
-				parts[part] += content
+				messages[messageIndex] += content
 			})
 
-			for _, content := range parts {
+			for _, content := range messages {
 				msg := telegram.NewMessage(update.Message.Chat.ID, content)
 				msg.ParseMode = "Markdown"
 				_, err = bot.Send(msg)
@@ -96,16 +100,17 @@ func WordReferenceCommand() lib.Command {
 	}
 }
 
-func ExtractText(node *html.Node) (text, pronouns string) {
-	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		if c.Data == "strong" || c.Data == "span" {
-			t, p := ExtractText(c)
+// ExtractTranslationText navigates deeply into HTML nodes to extract useful text for translations
+func ExtractTranslationText(node *html.Node) (text, pronouns string) {
+	for child := node.FirstChild; child != nil; child = child.NextSibling {
+		if child.Data == "strong" || child.Data == "span" {
+			t, p := ExtractTranslationText(child)
 			text += t
 			pronouns += p
-		} else if c.Data == "em" && c.FirstChild != nil {
-			pronouns += c.FirstChild.Data
-		} else if c.Data != "br" {
-			text += c.Data
+		} else if child.Data == "em" && child.FirstChild != nil {
+			pronouns += child.FirstChild.Data
+		} else if child.Data != "br" {
+			text += child.Data
 		}
 	}
 	return

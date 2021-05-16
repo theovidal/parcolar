@@ -8,8 +8,8 @@ import (
 	"github.com/theovidal/bacbot/lib"
 )
 
-// API_URL is the endpoint of the OpenData endpoint
-var API_URL = "https://data.enseignementsup-recherche.gouv.fr/api/records/1.0/search/?dataset=fr-esr-parcoursup"
+// ApiUrl is the endpoint of the OpenData API
+const ApiUrl = "https://data.enseignementsup-recherche.gouv.fr/api/records/1.0/search/?dataset=fr-esr-parcoursup"
 
 // APIResult stores the result of a call to the OpenData API
 type APIResult struct {
@@ -48,7 +48,7 @@ type Record struct {
 func SearchRecords(query string) (result APIResult) {
 	request, _ := http.NewRequest(
 		"GET",
-		lib.EncodeURL(API_URL, map[string]string{
+		lib.EncodeURL(ApiUrl, map[string]string{
 			"q": query,
 		}),
 		nil,

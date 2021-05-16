@@ -12,6 +12,9 @@ import (
 	"github.com/theovidal/bacbot/lib"
 )
 
+// DefinitionUrl is the endpoint of the French dictionary used for definitions
+const DefinitionUrl = "https://larousse.fr/dictionnaires/francais/"
+
 func DefinitionCommand() lib.Command {
 	return lib.Command{
 		Name:        "definition",
@@ -22,21 +25,21 @@ func DefinitionCommand() lib.Command {
 			}
 
 			word := args[0]
-			res, err := http.Get("https://www.larousse.fr/dictionnaires/francais/" + word)
+			response, err := http.Get(DefinitionUrl + word)
 			if err != nil {
 				log.Fatal(err)
 			}
-			defer res.Body.Close()
-			if res.StatusCode != 200 {
+			defer response.Body.Close()
+			if response.StatusCode != 200 {
 				return lib.Error(bot, update, "Une erreur inconnue s'est produite lors de la recherche dans le dictionnaire.")
 			}
 
-			doc, err := goquery.NewDocumentFromReader(res.Body)
+			document, err := goquery.NewDocumentFromReader(response.Body)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			selection := doc.Find("ul.Definitions li")
+			selection := document.Find("ul.Definitions li")
 			if selection.Length() == 0 {
 				return lib.Error(bot, update, "Aucune définition trouvée pour ce terme.")
 			}
