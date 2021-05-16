@@ -32,16 +32,25 @@ func TranslateCommand() lib.Command {
 			if len(args) < 2 {
 				return lib.Error(bot, update, "Indiquez la langue cible ainsi que le texte à traduire.")
 			}
-			to := args[0]
+			from := strings.ToUpper(flags["source"].(string))
+			to := strings.ToUpper(args[0])
 			text := strings.Join(args[1:], " ")
+
+			if _, exists := sourceLanguages[from]; !exists && from != "" {
+				return lib.Error(bot, update, "La langue source est invalide. Veuillez choisir parmi "+sourceLanguagesDoc)
+			}
+
+			if _, exists := targetLanguages[to]; !exists {
+				return lib.Error(bot, update, "La langue cible est invalide. Veuillez choisir parmi "+targetLanguagesDoc)
+			}
 
 			request, _ := http.NewRequest(
 				"GET",
 				lib.EncodeURL("https://api-free.deepl.com/v2/translate", map[string]string{
 					"auth_key":    os.Getenv("DEEPL_KEY"),
 					"text":        text,
-					"source_lang": flags["source"].(string),
-					"target_lang": strings.ToUpper(to),
+					"source_lang": from,
+					"target_lang": to,
 				}),
 				nil,
 			)
@@ -67,8 +76,8 @@ func TranslateCommand() lib.Command {
 			for _, translation := range result.Translations {
 				content += fmt.Sprintf(
 					"*―――――― 💱 %s → %s ――――――*\n%s",
-					availableLanguages[translation.SourceLanguage],
-					availableLanguages[strings.ToUpper(to)],
+					sourceLanguages[translation.SourceLanguage],
+					targetLanguages[to],
 					translation.Text,
 				)
 			}
@@ -81,7 +90,7 @@ func TranslateCommand() lib.Command {
 	}
 }
 
-var availableLanguages = map[string]string{
+var sourceLanguages = map[string]string{
 	"BG": "🇧🇬",
 	"CS": "🇨🇿",
 	"DA": "🇩🇰",
@@ -106,4 +115,28 @@ var availableLanguages = map[string]string{
 	"SL": "🇸🇮",
 	"SV": "🇸🇪",
 	"ZH": "🇨🇳",
+}
+
+var targetLanguages = func() (output map[string]string) {
+	output = map[string]string{
+		"EN-GB": "🇬🇧",
+		"EN-US": "🇺🇸",
+		"PT-PT": "🇵🇹",
+		"PT-BR": "🇧🇷",
+	}
+	for language, flag := range sourceLanguages {
+		output[language] = flag
+	}
+	return
+}()
+
+var sourceLanguagesDoc = generateDoc(sourceLanguages)
+var targetLanguagesDoc = generateDoc(targetLanguages)
+
+func generateDoc(input map[string]string) string {
+	var languages []string
+	for lang := range input {
+		languages = append(languages, lang)
+	}
+	return strings.Join(languages, ", ")
 }
