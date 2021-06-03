@@ -46,15 +46,31 @@ func WordReferenceCommand() lib.Command {
 				log.Fatal(err)
 			}
 
+			audioSources := document.Find("audio source")
+
+			var audios []string
+			audioSources.Each(func(index int, audio *goquery.Selection) {
+				url, _ := audio.Attr("src")
+				urlParts := strings.Split(url, "/")
+
+				fmt.Println(urlParts)
+				label := "Source"
+				if len(urlParts) > 3 {
+					label = strings.Join(urlParts[2:4], "/")
+				}
+
+				audios = append(audios, fmt.Sprintf("[%s](https://wordreference.com%s)", label, url))
+			})
+
+			messages := []string{
+				fmt.Sprintf("*―――――― 📚 %s → %s ――――――*\n\n🔊 %s", search, strings.ToUpper(to), strings.Join(audios, ", ")),
+			}
+			var messageIndex int
+
 			selection := document.Find("table.WRD tbody tr:not(.wrtopsection,.langHeader)")
 			if selection.Length() == 0 {
 				return lib.Error(bot, update, "Aucune traduction trouvée pour ce terme ou cette expression.")
 			}
-
-			messages := []string{
-				fmt.Sprintf("*―――――― 📚 %s → %s ――――――*", search, strings.ToUpper(to)),
-			}
-			var messageIndex int
 
 			selection.Each(func(_ int, element *goquery.Selection) {
 				var content string
@@ -109,7 +125,7 @@ func ExtractTranslationText(node *html.Node) (text, pronouns string) {
 			pronouns += p
 		} else if child.Data == "em" && child.FirstChild != nil {
 			pronouns += child.FirstChild.Data
-		} else if child.Data != "br" {
+		} else if child.Data != "br" && child.Data != "a" {
 			text += child.Data
 		}
 	}
