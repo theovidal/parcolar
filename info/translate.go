@@ -32,13 +32,16 @@ type Translation struct {
 func TranslateCommand() lib.Command {
 	return lib.Command{
 		Name:        "translate",
-		Description: "Traduire un texte entier avec contexte (DeepL)",
+		Description: fmt.Sprintf("Traduire un texte entier avec contexte (DeepL).\n\nLes langues sources disponibles sont : %s.\n\nLes langues cibles disponibles sont : %s.", sourceLanguagesDoc, targetLanguagesDoc),
 		Flags: map[string]lib.Flag{
 			"source": {Description: "Manuellement inscrire la langue source", Value: ""},
 		},
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) (err error) {
 			if len(args) < 2 {
-				return lib.Error(bot, update, "Indiquez la langue cible ainsi que le texte à traduire.")
+				help := telegram.NewMessage(update.Message.Chat.ID, TranslateCommand().Help())
+				help.ParseMode = "Markdown"
+				_, err := bot.Send(help)
+				return err
 			}
 			from := strings.ToUpper(flags["source"].(string))
 			to := strings.ToUpper(args[0])
@@ -146,8 +149,8 @@ var targetLanguagesDoc = generateDoc(targetLanguages)
 // generateDoc generates the documentation text for languages list
 func generateDoc(input map[string]string) string {
 	var languages []string
-	for lang := range input {
-		languages = append(languages, lang)
+	for lang, flag := range input {
+		languages = append(languages, flag+" "+lang)
 	}
 	return strings.Join(languages, ", ")
 }

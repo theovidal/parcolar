@@ -19,14 +19,28 @@ const WordReferenceUrl = "https://www.wordreference.com"
 func WordReferenceCommand() lib.Command {
 	return lib.Command{
 		Name:        "translation",
-		Description: "Obtenir la traduction d'un terme ou d'une expression (WordReference)",
+		Description: fmt.Sprintf("Obtenir la traduction d'un terme ou d'une expression (WordReference). Passez la langue source en premier argument, la langue cible en deuxième et le terme ou l'expression à la suite.\n\nLes langues disponibles sont : %s.", wordReferenceLanguagesDoc),
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, _ map[string]interface{}) error {
 			if len(args) < 3 {
-				return lib.Error(bot, update, "Indiquez les deux langues ainsi que le terme à traduire.")
+				help := telegram.NewMessage(update.Message.Chat.ID, WordReferenceCommand().Help())
+				help.ParseMode = "Markdown"
+				_, err := bot.Send(help)
+				return err
 			}
 			from := args[0]
 			to := args[1]
 			search := strings.Join(args[2:], " ")
+
+			fmt.Println("aaaaa")
+			fmt.Println(from)
+
+			if _, exists := wordReferenceLanguages[from]; !exists {
+				return lib.Error(bot, update, "La langue source est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
+			}
+
+			if _, exists := wordReferenceLanguages[to]; !exists {
+				return lib.Error(bot, update, "La langue cible est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
+			}
 
 			response, err := http.Get(fmt.Sprintf("%s/%s%s/%s", WordReferenceUrl, from, to, search))
 			if err != nil {
@@ -131,3 +145,31 @@ func ExtractTranslationText(node *html.Node) (text, pronouns string) {
 	}
 	return
 }
+
+var wordReferenceLanguages = map[string]string{
+	"fr": "🇫🇷",
+	"en": "🇬🇧",
+	"es": "🇪🇸",
+	"it": "🇮🇹",
+	"de": "🇩🇪",
+	"nl": "🇳🇱",
+	"sv": "🇸🇪",
+	"pt": "🇵🇹",
+	"ru": "🇷🇺",
+	"pl": "🇵🇱",
+	"cz": "🇨🇿",
+	"gr": "🇬🇷",
+	"tr": "🇹🇷",
+	"zh": "🇨🇳",
+	"ja": "🇯🇵",
+	"ko": "🇰🇴",
+	"ar": "🇸🇦",
+}
+
+var wordReferenceLanguagesDoc = func() string {
+	var languages []string
+	for lang, flag := range wordReferenceLanguages {
+		languages = append(languages, flag+" "+lang)
+	}
+	return strings.Join(languages, ", ")
+}()
