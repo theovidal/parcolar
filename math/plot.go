@@ -9,12 +9,13 @@ import (
 	"github.com/vdobler/chart"
 
 	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/bacbot/math/data"
 )
 
 func PlotCommand() lib.Command {
 	return lib.Command{
 		Name:        "plot",
-		Description: fmt.Sprintf("Tracer des graphiques riches et personnalisés. Vous pouvez tracer plusieurs fonctions en séparant leurs expressions par une esperluette `&`.\n%s\n\n%s", dataDocumentation, calcDisclaimer),
+		Description: fmt.Sprintf("Tracer des graphiques riches et personnalisés. Vous pouvez tracer plusieurs fonctions en séparant leurs expressions par une esperluette `&`.\n%s\n\n%s", data.DataDocumentation, data.CalcDisclaimer),
 		Flags: map[string]lib.Flag{
 			"x_min":   {"Valeur minimale de `x` à afficher", -10.0},
 			"x_max":   {"Valeur maximale de `x` à afficher", 10.0},
@@ -30,9 +31,9 @@ func PlotCommand() lib.Command {
 			"grid": {"Afficher la grille sur le graphique (0 ou 1)", 1},
 		},
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
-			/* lineColor, exists := lib.Colors[flags["color"].(string)]
+			/* lineColor, exists := data.Colors[flags["color"].(string)]
 			if !exists {
-				return lib.Error(bot, update, "La couleur spécifiée n'existe pas. Vérifiez la liste des couleurs disponibles sur la page d'aide de la commande.")
+				return data.Error(bot, update, "La couleur spécifiée n'existe pas. Vérifiez la liste des couleurs disponibles sur la page d'aide de la commande.")
 			} */
 
 			if len(args) == 0 {
@@ -74,10 +75,10 @@ func PlotCommand() lib.Command {
 			}
 
 			for _, function := range functions {
-				if err := CheckExpression(function); err != nil {
+				if err := data.CheckExpression(function); err != nil {
 					return lib.Error(bot, update, err.Error())
 				}
-				if _, err := Evaluate(function, 1); err != nil {
+				if _, err := data.Evaluate(function, 1); err != nil {
 					return lib.Error(bot, update, err.Error())
 				}
 			}
@@ -96,7 +97,7 @@ func PlotCommand() lib.Command {
 				colorNumber++
 
 				plot.AddFunc(current, func(x float64) float64 {
-					value, _ := Evaluate(current, x)
+					value, _ := data.Evaluate(current, x)
 					return value
 				}, chart.PlotStyleLines, style)
 			}

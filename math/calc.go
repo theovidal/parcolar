@@ -8,12 +8,14 @@ import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/bacbot/math/data"
 )
 
 func CalcCommand() lib.Command {
+	data.GatherFunctions()
 	return lib.Command{
 		Name:        "calc",
-		Description: fmt.Sprintf("Calculer une valeur mathématique à l'aide d'une expression.\n%s\n\n%s", dataDocumentation, calcDisclaimer),
+		Description: fmt.Sprintf("Calculer une valeur mathématique à l'aide d'une expression.\n%s\n\n%s", data.DataDocumentation, data.CalcDisclaimer),
 		Flags: map[string]lib.Flag{
 			"sf":  {"Nombre de chiffres après la virgule", 2},
 			"sci": {"Activer la notation scientifique (0 ou 1)", 0},
@@ -27,11 +29,11 @@ func CalcCommand() lib.Command {
 			}
 
 			function := strings.Join(args, " ")
-			if err := CheckExpression(function); err != nil {
+			if err := data.CheckExpression(function); err != nil {
 				return lib.Error(bot, update, err.Error())
 			}
 
-			value, err := Evaluate(function, 1.0)
+			value, err := data.Evaluate(function, 1.0)
 			if err != nil {
 				return lib.Error(bot, update, err.Error())
 			}
