@@ -22,8 +22,9 @@ var commandsList = map[string]lib.Command{
 	"wordreference": info.WordReferenceCommand(),
 
 	// ―――――― Mathematics ――――――
-	"calc": math.CalcCommand(),
-	"plot": math.PlotCommand(),
+	"calc":  math.CalcCommand(),
+	"plot":  math.PlotCommand(),
+	"latex": math.LatexCommand(),
 
 	// ―――――― Pronote ――――――
 	"contents":       pronote.ContentsCommand(),
