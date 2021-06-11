@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/Knetic/govaluate"
 )
@@ -35,23 +36,39 @@ func Integral(args ...interface{}) (interface{}, error) {
 
 	var integral float64
 	for i := 0.0; i <= n; i++ {
-		variables["x"] = a + h*i
+		x := a + h*i
+		m := a + h*(i+0.5)
+
+		variables["x"] = x
 		eval, err := f.Evaluate(variables)
-		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Fonction non définie en %s", eval))
+		fX := eval.(float64)
+		if fX < 0 && calculateSurface {
+			fX *= -1
 		}
 
-		value := eval.(float64)
+		variables["x"] = m
+		eval, err = f.Evaluate(variables)
+		fM := eval.(float64)
+		if fM < 0 && calculateSurface {
+			fM *= -1
+		}
+
+		if err != nil || fX == math.NaN() || fX == math.Inf(1) || fX == math.Inf(-1) {
+			return nil, errors.New(fmt.Sprintf("Fonction non définie en %g", x))
+		}
+
+		if i < n {
+			integral += 4 * fM
+			if i > 0 {
+				integral += 2 * fX
+			}
+		}
 		if i == 0.0 || i == n {
-			value *= 0.5
+			integral += fX
 		}
-		if value < 0 && calculateSurface {
-			value *= -1
-		}
-		integral += value
 	}
 
-	return integral * h, nil
+	return integral * h / 6, nil
 }
 
 func Surface(args ...interface{}) (interface{}, error) {

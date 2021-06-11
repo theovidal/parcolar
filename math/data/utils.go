@@ -21,7 +21,10 @@ func Evaluate(function string, x float64) (value float64, err error) {
 	expression, _ := govaluate.NewEvaluableExpressionWithFunctions(function, Functions)
 	variables := Constants
 	variables["x"] = x
-	y, _ := expression.Evaluate(variables)
+	y, err := expression.Evaluate(variables)
+	if err != nil {
+		return 0.0, err
+	}
 	value, ok := y.(float64)
 	if !ok {
 		err = errors.New("L'expression n'est pas valide, car certains symboles ne renvoient pas des nombres réels.")
