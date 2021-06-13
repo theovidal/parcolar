@@ -31,9 +31,6 @@ func WordReferenceCommand() lib.Command {
 			to := args[1]
 			search := strings.Join(args[2:], " ")
 
-			fmt.Println("aaaaa")
-			fmt.Println(from)
-
 			if _, exists := wordReferenceLanguages[from]; !exists {
 				return lib.Error(bot, update, "La langue source est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
 			}
@@ -67,7 +64,6 @@ func WordReferenceCommand() lib.Command {
 				url, _ := audio.Attr("src")
 				urlParts := strings.Split(url, "/")
 
-				fmt.Println(urlParts)
 				label := "Source"
 				if len(urlParts) > 3 {
 					label = strings.Join(urlParts[2:4], "/")

@@ -8,8 +8,8 @@ import (
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
+	"github.com/theovidal/bacbot/info"
 	"github.com/theovidal/bacbot/lib"
-	"github.com/theovidal/bacbot/parcoursup"
 	"github.com/theovidal/bacbot/pronote"
 )
 
@@ -43,7 +43,7 @@ func main() {
 	go func() {
 		for update := range updates {
 			if update.InlineQuery != nil {
-				parcoursup.HandleRequest(bot, &update)
+				info.ParcoursupCommand(bot, &update)
 			} else if update.Message.IsCommand() {
 				if update.Message.From.UserName != os.Getenv("TELEGRAM_USER") {
 					continue
