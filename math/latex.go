@@ -1,6 +1,7 @@
 package math
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -8,19 +9,37 @@ import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/bacbot/math/data"
 )
 
 func LatexCommand() lib.Command {
 	return lib.Command{
 		Name:        "latex",
 		Description: "Rendre du code LaTeX sur une image haute définition et l'envoyer dans le chat Telegram.",
-		// TODO: customize output, documentation on installing imagick and pdflatex, documentation on available packages
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, _ map[string]interface{}) (err error) {
-			expression := strings.Join(args, " ")
+		Flags: map[string]lib.Flag{
+			"background": {"Couleur de l'arrière-plan", "white", &data.Colors},
+			"text":       {"Couleur du texte", "black", &data.Colors},
+		},
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) (err error) {
+			if len(args) == 0 {
+				help := telegram.NewMessage(update.Message.Chat.ID, LatexCommand().Help())
+				help.ParseMode = "Markdown"
+				_, err := bot.Send(help)
+				return err
+			}
 
-			path, file, err := lib.GenerateLatex(strconv.Itoa(update.UpdateID), expression)
+			bgColor := flags["background"].(string)
+			textColor := flags["text"].(string)
+
+			expression := fmt.Sprintf("\\color{%s} $%s$", textColor, strings.Join(args, " "))
+
+			path, file, err := lib.GenerateLatex(
+				strconv.Itoa(update.UpdateID),
+				fmt.Sprintf("\\pagecolor{%s}", bgColor),
+				expression,
+			)
 			if err != nil {
-				return lib.Error(bot, update, "Erreur dans le traitement de l'expression.")
+				return lib.Error(bot, update, err.Error())
 			}
 			reader := telegram.FileReader{
 				Name:   "expression.png",

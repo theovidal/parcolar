@@ -2,15 +2,18 @@ package lib
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
 )
 
-const LatexHeader = `\documentclass[preview, border=5pt, 12pt]{standalone} \usepackage{pgfplots} \pgfplotsset{compat = newest} \usepackage{amsmath} \usepackage{amssymb}\usepackage[utf8x]{inputenc} \usepackage{xcolor} \pagecolor{white} \everymath{\displaystyle}`
+const LatexHeader = `\documentclass[preview, border=5pt, 12pt]{standalone} \usepackage{pgfplots} \pgfplotsset{compat = newest} \usepackage{amsmath} \usepackage{amssymb}\usepackage[utf8x]{inputenc} \usepackage{xcolor} \everymath{\displaystyle}`
 
-func GenerateLatex(name string, expression string) (pngPath string, file *os.File, err error) {
+func GenerateLatex(name string, heading string, expression string) (pngPath string, file *os.File, err error) {
 	filename := "latex-" + name
 	pdfPath := fmt.Sprintf("%s/%s.pdf", TempDir, filename)
 	pngPath = fmt.Sprintf("%s/%s.png", TempDir, filename)
@@ -20,8 +23,9 @@ func GenerateLatex(name string, expression string) (pngPath string, file *os.Fil
 		"pdflatex",
 		"-jobname="+filename,
 		fmt.Sprintf(
-			"%s \\begin{document} %s \\end{document}",
+			"%s %s \\begin{document} %s \\end{document}",
 			LatexHeader,
+			heading,
 			expression,
 		),
 	)
@@ -34,6 +38,11 @@ func GenerateLatex(name string, expression string) (pngPath string, file *os.Fil
 	os.Remove(filename + ".aux")
 	os.Remove(filename + ".log")
 	if err != nil {
+		match := regexp.MustCompile("!(.*)\\n(.*)\\n.")
+		message := match.Find(out.Bytes())
+		err = errors.New(
+			fmt.Sprintf("Erreur dans l'expression : `%s`", strings.TrimPrefix(string(message), "! ")),
+		)
 		return
 	}
 
