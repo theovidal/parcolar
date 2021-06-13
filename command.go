@@ -105,6 +105,9 @@ func ParseFlags(args []string, commandFlags map[string]lib.Flag) ([]string, map[
 			}
 		case string:
 			value = parts[1]
+			if exists := lib.Contains(*flag.Enum, value.(string)); !exists && flag.Enum != nil && len(*flag.Enum) > 0 {
+				return nil, nil, errors.New(fmt.Sprintf("Les valeurs acceptées pour le paramètre `%s` sont : %s.", name, strings.Join(*flag.Enum, ", ")))
+			}
 		default:
 			panic("Unhandled type for flag " + name)
 		}

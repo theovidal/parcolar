@@ -17,25 +17,20 @@ func PlotCommand() lib.Command {
 		Name:        "plot",
 		Description: fmt.Sprintf("Tracer des graphiques riches et personnalisés. Vous pouvez tracer plusieurs fonctions en séparant leurs expressions par une esperluette `&`.\n%s\n\n%s", data.DataDocumentation, data.CalcDisclaimer),
 		Flags: map[string]lib.Flag{
-			"x_min":   {"Valeur minimale de `x` à afficher", -10.0},
-			"x_max":   {"Valeur maximale de `x` à afficher", 10.0},
-			"x_scale": {"Pas pour l'abscisse", 1.0},
-			"y_min":   {"Valeur minimale de `y` à afficher", -10.0},
-			"y_max":   {"Valeur maximale de `y` à afficher", 10.0},
-			"y_scale": {"Pas pour l'ordonnée", 1.0},
+			"x_min":   {"Valeur minimale de `x` à afficher", -10.0, nil},
+			"x_max":   {"Valeur maximale de `x` à afficher", 10.0, nil},
+			"x_scale": {"Pas pour l'abscisse", 1.0, nil},
+			"y_min":   {"Valeur minimale de `y` à afficher", -10.0, nil},
+			"y_max":   {"Valeur maximale de `y` à afficher", 10.0, nil},
+			"y_scale": {"Pas pour l'ordonnée", 1.0, nil},
 
 			// TODO: color choice with multiple functions
 			// "color":      {"Couleur de la courbe : `red`, `pink`, `purple`, `indigo`, `blue`, `light_blue`, `cyan`, `teal`, `green`, `light_green`, `lime`, `yellow`, `amber`, `orange`, `brown`.", "red"},
-			"line_width": {"Épaisseur de la courbe (en pixels)", 1},
+			"line_width": {"Épaisseur de la courbe (en pixels)", 1, nil},
 
-			"grid": {"Afficher la grille sur le graphique (0 ou 1)", 1},
+			"grid": {"Afficher la grille sur le graphique (0 ou 1)", 1, nil},
 		},
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
-			/* lineColor, exists := data.Colors[flags["color"].(string)]
-			if !exists {
-				return data.Error(bot, update, "La couleur spécifiée n'existe pas. Vérifiez la liste des couleurs disponibles sur la page d'aide de la commande.")
-			} */
-
 			if len(args) == 0 {
 				help := telegram.NewMessage(update.Message.Chat.ID, PlotCommand().Help())
 				help.ParseMode = "Markdown"

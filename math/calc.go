@@ -17,8 +17,8 @@ func CalcCommand() lib.Command {
 		Name:        "calc",
 		Description: fmt.Sprintf("Calculer une valeur mathématique à l'aide d'une expression.\n%s\n\n%s", data.DataDocumentation, data.CalcDisclaimer),
 		Flags: map[string]lib.Flag{
-			"sf":  {"Nombre de chiffres après la virgule", 2},
-			"sci": {"Activer la notation scientifique (0 ou 1)", 0},
+			"sf":  {"Nombre de chiffres après la virgule", 2, nil},
+			"sci": {"Activer la notation scientifique (0 ou 1)", 0, nil},
 		},
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
 			if len(args) == 0 {

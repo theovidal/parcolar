@@ -27,6 +27,17 @@ func ParseTelegramMessage(input string) (output string) {
 	return
 }
 
+// Contains check if a specific slice contains a string
+func Contains(slice []string, text string) bool {
+	for _, item := range slice {
+		if item == text {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Red is a tool to display Red color into the term
 var Red = color.New(color.FgRed)
 

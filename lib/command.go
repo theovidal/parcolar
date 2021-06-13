@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
+	"strings"
 )
 
 // Command describes a Telegram commands with all its information
@@ -21,11 +22,14 @@ func (c Command) Help() (content string) {
 	content = fmt.Sprintf("*―――――― Aide de la commande %s ――――――*\n%s", c.Name, c.Description)
 
 	if len(c.Flags) > 0 {
-		content += "\n\nListe des flags disponibles sur cette commande :\n"
+		content += "\n\nListe des paramètres disponibles sur cette commande :\n"
 		for name, flag := range c.Flags {
 			content += fmt.Sprintf("• `%s` : %s _(par défaut : %v)_\n", name, flag.Description, flag.Value)
+			if flag.Enum != nil && len(*flag.Enum) > 0 {
+				content += fmt.Sprintf("_Valeurs possibles : %s_\n", strings.Join(*flag.Enum, ", "))
+			}
 		}
-		content += "Les flags sont à ajouter en début de commande sous la forme `nom=valeur`. Veillez à respecter le type de chacun (nombre entier, réel...)"
+		content += "Les paramètres sont à ajouter en début de commande sous la forme `nom=valeur`. Veillez à respecter le type de chacun (nombre entier, réel...)"
 	}
 
 	return
@@ -37,4 +41,6 @@ type Flag struct {
 	Description string
 	// Default value of the flag. Currently supported types: string, integer, float
 	Value interface{}
+	// A list of accepted strings for this flag
+	Enum *[]string
 }
