@@ -10,7 +10,7 @@ import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"golang.org/x/net/html"
 
-	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/parcolar/lib"
 )
 
 // WordReferenceUrl is the endpoint to the translation dictionary

@@ -11,7 +11,7 @@ import (
 	"github.com/vdobler/chart/imgg"
 )
 
-/* var Colors = map[string]color.NRGBA{
+/* var PlotColors = map[string]color.NRGBA{
 	"red":         {0xf4, 0x43, 0x36, 0xff},
 	"pink":        {0xe9, 0x1e, 0x63, 0xff},
 	"purple":      {0x9c, 0x27, 0xb0, 0xff},
@@ -29,8 +29,8 @@ import (
 	"brown":       {0x79, 0x55, 0x48, 0xff},
 } */
 
-// Colors defines the colors available for charts
-var Colors = []color.NRGBA{
+// PlotColors defines the colors available for charts
+var PlotColors = []color.NRGBA{
 	{0xcd, 0xdc, 0x39, 0xff},
 	{0x03, 0xa9, 0xf4, 0xff},
 	{0xf4, 0x43, 0x36, 0xff},

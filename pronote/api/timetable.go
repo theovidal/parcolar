@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/parcolar/lib"
 )
 
 // Lesson represents a class during a day on a specific subject

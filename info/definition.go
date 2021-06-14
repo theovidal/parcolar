@@ -9,7 +9,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/parcolar/lib"
 )
 
 // DefinitionUrl is the endpoint of the French dictionary used for definitions

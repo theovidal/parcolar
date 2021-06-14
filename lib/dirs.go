@@ -9,6 +9,7 @@ import (
 var TempDir string
 var WorkDir string
 
+// OpenDirs loads current and temporary directories
 func OpenDirs() {
 	temp, err := ioutil.TempDir("", "bacbot")
 	if err != nil {

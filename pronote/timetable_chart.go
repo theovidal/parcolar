@@ -5,8 +5,8 @@ import (
 	"github.com/jinzhu/now"
 	"github.com/vdobler/chart"
 
-	"github.com/theovidal/bacbot/lib"
-	"github.com/theovidal/bacbot/pronote/api"
+	"github.com/theovidal/parcolar/lib"
+	"github.com/theovidal/parcolar/pronote/api"
 )
 
 func TimetableChartCommand() lib.Command {

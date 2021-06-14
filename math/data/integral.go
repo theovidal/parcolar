@@ -71,6 +71,7 @@ func Integral(args ...interface{}) (interface{}, error) {
 	return integral * h / 6, nil
 }
 
+// Surface is a short-hand to calculate integral of a function while taking in account its sign
 func Surface(args ...interface{}) (interface{}, error) {
 	args[4] = true
 	return Integral(args)

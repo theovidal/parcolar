@@ -1,15 +1,16 @@
 <div align="center">
-    <img src="assets/parcoursup.jpg" alt="parcoursup" max-width="75px">
-    <h1>BaccalauréatBot</h1>
-    <h3>Personal and educational Telegram bot</h3>
-    <a href="https://t.me/BaccalaureatBot">Add the bot</a>
+    <img src="assets/parcolar.png" alt="Parcolar" max-width="75px">
+    <h3>Personal Telegram bot for education</h3>
+    <a href="https://t.me/ParcolarBot">Add the bot</a> — <a href="./LICENSE">License</a>
 </div>
 
 ## 🌈 Features
 
-- Fetch the homework and timetable for the coming days directly from PRONOTE (French software for school life)
+- Fetch homework and timetable for the coming days directly from PRONOTE (French software for school life)
 - Do some maths: calculating, plotting, LaTeX rendering
 - Search data over educational establishments (Parcoursup), translations of words and sentences, word definitions in the dictionary
+
+![Preview of the commands](./assets/commands-preview.jpeg)
 
 ## 💻 Development
 
@@ -25,8 +26,8 @@ First, check the following requirements:
 Clone the project on your local machine:
 
 ```bash
-git clone https://github.com/theovidal/bacbot  # HTTP
-git clone git@github.com:theovidal/bacbot      # SSH
+git clone https://github.com/theovidal/parcolar  # HTTP
+git clone git@github.com:theovidal/parcolar      # SSH
 ```
 
 Set up some environment variables described in the [.env.example file](./.env.example), either by adding them in the shell or by creating a .env file at the root of the project.

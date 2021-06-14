@@ -10,8 +10,8 @@ import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/jinzhu/now"
 
-	"github.com/theovidal/bacbot/lib"
-	"github.com/theovidal/bacbot/pronote/api"
+	"github.com/theovidal/parcolar/lib"
+	"github.com/theovidal/parcolar/pronote/api"
 )
 
 // TimetableLoop runs the TimetableTicker every 10 minutes, and is meant to be used in a goroutine.

@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/parcolar/lib"
 )
 
 // Response holds the data from Pronote

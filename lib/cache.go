@@ -22,4 +22,5 @@ func OpenCache() {
 		Password: os.Getenv("CACHE_PASSWORD"),
 		DB:       db,
 	})
+	log.Println(Cyan.Sprint("💾 Opened Redis cache on port " + os.Getenv("CACHE_PORT")))
 }

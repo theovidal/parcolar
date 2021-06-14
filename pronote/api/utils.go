@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/theovidal/bacbot/lib"
+	"github.com/theovidal/parcolar/lib"
 )
 
 // File stores a document attached to homework or contents

@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Knetic/govaluate"
 )
@@ -10,7 +11,7 @@ import (
 func CheckExpression(function string) (err error) {
 	_, err = govaluate.NewEvaluableExpressionWithFunctions(function, Functions)
 	if err != nil {
-		err = errors.New("L'expression entréee est invalide : `" + err.Error() + "`.")
+		err = fmt.Errorf("L'expression entréee est invalide : `%v`.", err)
 	}
 	return
 }

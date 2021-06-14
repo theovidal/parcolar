@@ -8,12 +8,13 @@ import (
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/theovidal/bacbot/info"
-	"github.com/theovidal/bacbot/lib"
-	"github.com/theovidal/bacbot/pronote"
+	"github.com/theovidal/parcolar/info"
+	"github.com/theovidal/parcolar/lib"
+	"github.com/theovidal/parcolar/pronote"
 )
 
 func main() {
+	lib.Green.Println(" ________  ________  ________  ________  ________  ___       ________  ________     \n|\\   __  \\|\\   __  \\|\\   __  \\|\\   ____\\|\\   __  \\|\\  \\     |\\   __  \\|\\   __  \\    \n\\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\___|\\ \\  \\|\\  \\ \\  \\    \\ \\  \\|\\  \\ \\  \\|\\  \\   \n \\ \\   ____\\ \\   __  \\ \\   _  _\\ \\  \\    \\ \\  \\\\\\  \\ \\  \\    \\ \\   __  \\ \\   _  _\\  \n  \\ \\  \\___|\\ \\  \\ \\  \\ \\  \\\\  \\\\ \\  \\____\\ \\  \\\\\\  \\ \\  \\____\\ \\  \\ \\  \\ \\  \\\\  \\| \n   \\ \\__\\    \\ \\__\\ \\__\\ \\__\\\\ _\\\\ \\_______\\ \\_______\\ \\_______\\ \\__\\ \\__\\ \\__\\\\ _\\ \n    \\|__|     \\|__|\\|__|\\|__|\\|__|\\|_______|\\|_______|\\|_______|\\|__|\\|__|\\|__|\\|__|")
 	lib.LoadEnv(".env")
 	lib.OpenCache()
 
@@ -61,5 +62,5 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	log.Println("💤 Closing down bot...")
+	log.Println(lib.Cyan.Sprintf("💤 Closing down bot"))
 }

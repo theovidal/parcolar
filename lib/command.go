@@ -18,6 +18,7 @@ type Command struct {
 	Execute func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error
 }
 
+// Help generates the help string for the command
 func (c Command) Help() (content string) {
 	content = fmt.Sprintf("*―――――― Aide de la commande %s ――――――*\n%s", c.Name, c.Description)
 

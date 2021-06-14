@@ -74,6 +74,7 @@ func GatherFunctions() {
 	}
 }
 
+// nonRealError is the default error shown when the user passes an argument to a numerical function that is not a real number
 var nonRealError = errors.New("Merci de renseigner un nombre réel.")
 
 // oneParamFunc is a short-hand helper to create a one-parameter mathematical function

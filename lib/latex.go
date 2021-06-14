@@ -11,8 +11,10 @@ import (
 	"strings"
 )
 
+// LatexHeader contains the default header for all LaTeX outputs
 const LatexHeader = `\documentclass[preview, border=5pt, 12pt]{standalone} \usepackage{pgfplots} \pgfplotsset{compat = newest} \usepackage{amsmath} \usepackage{amssymb}\usepackage[utf8x]{inputenc} \usepackage{xcolor} \everymath{\displaystyle}`
 
+// GenerateLatex renders a LaTeX expression into a PNG file
 func GenerateLatex(name string, heading string, expression string) (pngPath string, file *os.File, err error) {
 	filename := "latex-" + name
 	pdfPath := fmt.Sprintf("%s/%s.pdf", TempDir, filename)

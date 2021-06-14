@@ -38,8 +38,11 @@ func Contains(slice []string, text string) bool {
 	return false
 }
 
-// Red is a tool to display Red color into the term
+// Red is a tool to display text in red, in order to indicate an error or an interruption
 var Red = color.New(color.FgRed)
 
-// Green is a tool to display Green color into the term
+// Green is a tool to display text in green, in order to indicate a success or show the logo
 var Green = color.New(color.FgGreen)
+
+// Cyan is a tool to display text in cyan, in order to indicate an on-going task
+var Cyan = color.New(color.FgCyan)

@@ -6,8 +6,8 @@ import (
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/theovidal/bacbot/lib"
-	"github.com/theovidal/bacbot/pronote/api"
+	"github.com/theovidal/parcolar/lib"
+	"github.com/theovidal/parcolar/pronote/api"
 )
 
 func TimetableCommand() lib.Command {

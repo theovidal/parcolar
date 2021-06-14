@@ -8,8 +8,8 @@ import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/vdobler/chart"
 
-	"github.com/theovidal/bacbot/lib"
-	"github.com/theovidal/bacbot/math/data"
+	"github.com/theovidal/parcolar/lib"
+	"github.com/theovidal/parcolar/math/data"
 )
 
 func PlotCommand() lib.Command {
@@ -85,10 +85,10 @@ func PlotCommand() lib.Command {
 			colorNumber := 0
 			for _, function := range functions {
 				current := strings.TrimSpace(function)
-				if colorNumber == len(lib.Colors) {
+				if colorNumber == len(lib.PlotColors) {
 					colorNumber = 0
 				}
-				style.LineColor = lib.Colors[colorNumber]
+				style.LineColor = lib.PlotColors[colorNumber]
 				colorNumber++
 
 				plot.AddFunc(current, func(x float64) float64 {

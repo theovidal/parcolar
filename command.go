@@ -8,10 +8,10 @@ import (
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/theovidal/bacbot/info"
-	"github.com/theovidal/bacbot/lib"
-	"github.com/theovidal/bacbot/math"
-	"github.com/theovidal/bacbot/pronote"
+	"github.com/theovidal/parcolar/info"
+	"github.com/theovidal/parcolar/lib"
+	"github.com/theovidal/parcolar/math"
+	"github.com/theovidal/parcolar/pronote"
 )
 
 // commandsList stores the commands available on the Telegram bot
