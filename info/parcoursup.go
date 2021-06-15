@@ -13,7 +13,7 @@ import (
 )
 
 // ParcoursupUrl is the endpoint of the OpenData API
-const ParcoursupUrl = "https://data.enseignementsup-recherche.gouv.fr/api/records/1.0/search/?dataset=fr-esr-parcoursup"
+const ParcoursupUrl = "https://data.enseignementsup-recherche.gouv.fr/api/records/1.0/search/?dataset=fr-esr-cartographie_formations_parcoursup"
 
 // ParcoursupResponse stores the result of a call to the OpenData API
 type ParcoursupResponse struct {
@@ -30,21 +30,27 @@ type ParcoursupRecord struct {
 	// Specific fields related to the record
 	Fields struct {
 		// Full name of the file
-		Name string `json:"g_ea_lib_vx"`
+		Name string `json:"etab_nom"`
 		// The concerned course
-		Course string `json:"form_lib_voe_acc"`
+		Course string `json:"nm"`
 		// On what domain the course is specialized
-		Specialization string `json:"fil_lib_voe_acc"`
-		// More details on the course (required certificate...)
-		CourseDetail string `json:"detail_forma"`
+		Specialization string `json:"fl"`
 
+		// French city where the course is
+		City string `json:"commune"`
 		// French "département" where the course is
-		Department string `json:"dep_lib"`
+		Department string `json:"departement"`
 		// French region where the course is
-		Region string `json:"region_etab_aff"`
+		Region string `json:"region"`
+		// Longitude and latitude of course's location
+		Coordinates []float64 `json:"etab_gps"`
 
 		// Web URL to the Parcoursup file
-		Link string `json:"lien_form_psup"`
+		File string `json:"fiche"`
+		// Web URL to course's website
+		Website string `json:"etab_url"`
+		// Web URL to last year statistics on this course
+		Statistics string `json:"dataviz"`
 	}
 }
 
@@ -78,22 +84,30 @@ func ParcoursupCommand(bot *telegram.BotAPI, update *telegram.Update) {
 
 	var results []interface{}
 	for _, record := range records {
-		messageContent := fmt.Sprintf("[%s](%s)\n%s - %s", record.Fields.Name, record.Fields.Link, record.Fields.Course, record.Fields.Specialization)
-		if record.Fields.CourseDetail != "" {
-			messageContent += " - " + record.Fields.CourseDetail
-		}
-		messageContent += fmt.Sprintf("\n_%s, %s_", record.Fields.Department, record.Fields.Region)
-
-		results = append(results, telegram.InlineQueryResultArticle{
-			Type:  "article",
-			ID:    record.ID,
-			Title: fmt.Sprintf("%s - %s - %s", record.Fields.Name, record.Fields.Course, record.Fields.Specialization),
-			URL:   record.Fields.Link,
-			InputMessageContent: telegram.InputTextMessageContent{
-				Text:                  messageContent,
-				ParseMode:             "Markdown",
-				DisableWebPagePreview: false,
+		markup := &telegram.InlineKeyboardMarkup{
+			InlineKeyboard: [][]telegram.InlineKeyboardButton{
+				{
+					{Text: fmt.Sprintf("%s — %s", record.Fields.Course, record.Fields.Name), URL: &record.Fields.Website},
+				},
+				{
+					{Text: "📜 Fiche détaillée sur Parcoursup", URL: &record.Fields.File},
+				},
 			},
+		}
+		/* TODO: URL not added to button for some requests
+		if record.Fields.Statistics != "" {
+			markup.InlineKeyboard = append(markup.InlineKeyboard, []telegram.InlineKeyboardButton{
+				{ Text: "📈 Données statistiques pour l'année antérieure", URL: &record.Fields.Statistics },
+			})
+		} */
+
+		results = append(results, telegram.InlineQueryResultLocation{
+			Type:        "location",
+			ID:          record.ID,
+			Title:       fmt.Sprintf("%s - %s - %s", record.Fields.Course, record.Fields.Name, record.Fields.Specialization),
+			Latitude:    record.Fields.Coordinates[0],
+			Longitude:   record.Fields.Coordinates[1],
+			ReplyMarkup: markup,
 		})
 	}
 
