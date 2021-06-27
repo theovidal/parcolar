@@ -1,7 +1,7 @@
 <div align="center">
-    <img src="assets/parcolar.png" alt="Parcolar" max-width="75px">
-    <h3>Personal Telegram bot for education</h3>
-    <a href="https://t.me/ParcolarBot">Add the bot</a> — <a href="./LICENSE">License</a>
+  <img src="assets/parcolar.png" alt="Parcolar" max-width="75px">
+  <h3>Personal Telegram bot for education</h3>
+  <a href="https://t.me/ParcolarBot">Add the bot</a> — <a href="./LICENSE">License</a>
 </div>
 
 ## 🌈 Features
@@ -14,14 +14,15 @@
 
 ## 💻 Development
 
-First, check the following requirements:
+Thanks for participating in Parcolar's improvement and/or debugging! First, check the following requirements:
 
 - Git, for version control
-- Golang 1.15 or higher with go-modules for dependencies
+- Golang 1.16 or higher with go-modules for dependencies
 - A running instance of [Redis](https://redis.io/) v5 or higher
 - ~~A running instance of [pronote-api](https://github.com/Litarvan/pronote-api) for PRONOTE-related commands~~ Unfortunately, due to legal restrictions in France, PRONOTE can't be used any more through their API
 - [TeX Live](https://www.tug.org/texlive/acquire-netinstall.html) for the `pdflatex` program (with default LaTeX packages)
 - [ImageMagick](https://imagemagick.org/index.php) for the `convert` program
+  **⚠ Make sure to authorize PDF read and write in the `policy.xml` file of your installation**
 
 Clone the project on your local machine:
 
