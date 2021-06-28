@@ -1,8 +1,7 @@
 package pronote
 
 import (
-	"errors"
-	"log"
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -17,27 +16,22 @@ import (
 // TimetableLoop runs the TimetableTicker every 10 minutes, and is meant to be used in a goroutine.
 func TimetableLoop(bot *telegram.BotAPI) {
 	for range time.Tick(time.Minute * 10) {
-		err := TimetableTicker(bot)
-		if err != nil {
-			log.Println(lib.Red.Sprintf("‼ Error handling timetable ticker: %s", err))
+		if err := TimetableTicker(bot); err != nil {
+			lib.LogError("‼ Error handling timetable ticker: %s", err)
 		}
 	}
 }
 
 // TimetableTicker periodically fetches the timetable on PRONOTE for upcoming lessons, and sends a notification if there is one in the next 10 minutes
-func TimetableTicker(bot *telegram.BotAPI) error {
+func TimetableTicker(bot *telegram.BotAPI) (err error) {
 	response, err := api.GetTimetable(now.BeginningOfDay(), now.BeginningOfDay().Add(time.Hour*26))
-	if err != nil {
-		return err
-	}
-
-	if len(response.Timetable) == 0 {
-		return nil
+	if err != nil || len(response.Timetable) == 0 {
+		return
 	}
 
 	location, err := time.LoadLocation(os.Getenv("PRONOTE_TIMEZONE"))
 	if err != nil {
-		return errors.New("Can't get timezone " + err.Error() + " (from PRONOTE_TIMEZONE environment variable)")
+		return fmt.Errorf("Can't get timezone defined in PRONOTE_TIMEZONE environment variable")
 	}
 
 	from := time.Now().In(location).Unix()
@@ -56,13 +50,13 @@ func TimetableTicker(bot *telegram.BotAPI) error {
 
 		if date >= from && date <= to {
 			content := "*―――――― 🔔 Prochain cours ――――――*\n" + lesson.String()
-			chat, _ := strconv.Atoi(os.Getenv("TELEGRAM_CHAT"))
-			msg := telegram.NewMessage(int64(chat), content)
-			msg.ParseMode = "MarkdownV2"
-			_, err := bot.Send(msg)
-			return err
+			chatID, _ := strconv.Atoi(os.Getenv("TELEGRAM_CHAT"))
+			message := telegram.NewMessage(int64(chatID), content)
+			message.ParseMode = "MarkdownV2"
+			_, err = bot.Send(message)
+			return
 		}
 	}
 
-	return nil
+	return
 }

@@ -2,8 +2,9 @@ package lib
 
 import (
 	"fmt"
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"strings"
+
+	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Command describes a Telegram commands with all its information
@@ -30,7 +31,7 @@ func (c Command) Help() (content string) {
 				content += fmt.Sprintf("_Valeurs possibles : %s_\n", strings.Join(*flag.Enum, ", "))
 			}
 		}
-		content += "Les paramètres sont à ajouter en début de commande sous la forme `nom=valeur`. Veillez à respecter le type de chacun (nombre entier, réel...)"
+		content += "Les paramètres sont à ajouter à la commande sous la forme `nom=valeur`. Veillez à respecter le type de chacun (nombre entier, réel...)"
 	}
 
 	return

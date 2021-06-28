@@ -8,6 +8,8 @@ import (
 	"github.com/Knetic/govaluate"
 )
 
+// Integral uses Simpson's rule to integrate a function
+// See https://en.wikipedia.org/wiki/Simpson%27s_rule
 func Integral(args ...interface{}) (interface{}, error) {
 	expression, ok := args[0].(string)
 	if !ok {
@@ -17,44 +19,40 @@ func Integral(args ...interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	a := args[1].(float64)
-	b := args[2].(float64)
-	n := args[3].(float64)
+	a, ok := args[1].(float64)
+	if !ok {
+		return nil, nonRealError
+	}
+	b, ok := args[2].(float64)
+	if !ok {
+		return nil, nonRealError
+	}
+	n, ok := args[3].(float64)
+	if !ok {
+		return nil, nonRealError
+	}
 
 	var calculateSurface bool
 	if len(args) > 4 {
-		surface, ok := args[4].(bool)
-		if ok {
+		if surface, ok := args[4].(bool); ok {
 			calculateSurface = surface
 		}
 	}
 
 	h := (b - a) / n
-
 	f, _ := govaluate.NewEvaluableExpressionWithFunctions(expression, BasicFunctions)
-	variables := Constants
-
 	var integral float64
+
 	for i := 0.0; i <= n; i++ {
-		x := a + h*i
-		m := a + h*(i+0.5)
+		x, m := a+h*i, a+h*(i+0.5)
 
-		variables["x"] = x
-		eval, err := f.Evaluate(variables)
-		fX := eval.(float64)
-		if fX < 0 && calculateSurface {
-			fX *= -1
+		fX, err := evaluateForIntegral(f, calculateSurface, x)
+		if err != nil {
+			return nil, err
 		}
-
-		variables["x"] = m
-		eval, err = f.Evaluate(variables)
-		fM := eval.(float64)
-		if fM < 0 && calculateSurface {
-			fM *= -1
-		}
-
-		if err != nil || fX == math.NaN() || fX == math.Inf(1) || fX == math.Inf(-1) {
-			return nil, errors.New(fmt.Sprintf("Fonction non définie en %g", x))
+		fM, err := evaluateForIntegral(f, calculateSurface, m)
+		if err != nil {
+			return nil, err
 		}
 
 		if i < n {
@@ -75,4 +73,23 @@ func Integral(args ...interface{}) (interface{}, error) {
 func Surface(args ...interface{}) (interface{}, error) {
 	args[4] = true
 	return Integral(args)
+}
+
+// evaluateForIntegral is a shortcut to calculate and verify a value specifically for an integral (real value wanted)
+func evaluateForIntegral(f *govaluate.EvaluableExpression, surface bool, x float64) (y float64, err error) {
+	variables := Constants
+	variables["x"] = x
+	eval, err := f.Evaluate(variables)
+	y, ok := eval.(float64)
+	if !ok {
+		return y, nonRealReturnedError
+	}
+
+	if err != nil || y == math.NaN() || y == math.Inf(1) || y == math.Inf(-1) {
+		return y, fmt.Errorf("Fonction non définie en %g.", x)
+	}
+	if y < 0 && surface {
+		y *= -1
+	}
+	return
 }

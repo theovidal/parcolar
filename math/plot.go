@@ -28,7 +28,7 @@ func PlotCommand() lib.Command {
 			// "color":      {"Couleur de la courbe : `red`, `pink`, `purple`, `indigo`, `blue`, `light_blue`, `cyan`, `teal`, `green`, `light_green`, `lime`, `yellow`, `amber`, `orange`, `brown`.", "red"},
 			"line_width": {"Épaisseur de la courbe (en pixels)", 1, nil},
 
-			"grid": {"Afficher la grille sur le graphique (0 ou 1)", 1, nil},
+			"grid": {"Afficher la grille sur le graphique (0 ou 1)", true, nil},
 		},
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
 			if len(args) == 0 {
@@ -38,7 +38,7 @@ func PlotCommand() lib.Command {
 				return err
 			}
 
-			grid := flags["grid"].(int)
+			grid := flags["grid"].(bool)
 
 			raw := strings.Join(args, " ")
 			functions := strings.Split(raw, "&")
@@ -46,13 +46,12 @@ func PlotCommand() lib.Command {
 			plot := chart.ScatterChart{}
 			plot.XRange.MinMode.Fixed, plot.XRange.MaxMode.Fixed = true, true
 			plot.XRange.MinMode.Value, plot.XRange.MaxMode.Value = flags["x_min"].(float64), flags["x_max"].(float64)
-			if grid == 1 {
-				plot.XRange.TicSetting.Grid = chart.GridLines
-			}
 
 			plot.YRange.MinMode.Fixed, plot.YRange.MaxMode.Fixed = true, true
 			plot.YRange.MinMode.Value, plot.YRange.MaxMode.Value = flags["y_min"].(float64), flags["y_max"].(float64)
-			if grid == 1 {
+
+			if grid {
+				plot.XRange.TicSetting.Grid = chart.GridLines
 				plot.YRange.TicSetting.Grid = chart.GridLines
 			}
 

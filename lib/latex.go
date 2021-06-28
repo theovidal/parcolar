@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -31,20 +30,16 @@ func GenerateLatex(name string, heading string, expression string) (pngPath stri
 			expression,
 		),
 	)
-	var out bytes.Buffer
-	pdflatex.Stdout = &out
+	var commandResult bytes.Buffer
+	pdflatex.Stdout = &commandResult
 	err = pdflatex.Run()
-	if os.Getenv("ENV") == "dev" {
-		log.Println(out.String())
-	}
 	os.Remove(filename + ".aux")
 	os.Remove(filename + ".log")
 	if err != nil {
-		match := regexp.MustCompile("!(.*)\\n(.*)\\n.")
-		message := match.Find(out.Bytes())
-		err = errors.New(
-			fmt.Sprintf("Erreur dans l'expression : `%s`", strings.TrimPrefix(string(message), "! ")),
-		)
+		LogDebug(commandResult.String())
+		pdflatexErrorRegex := regexp.MustCompile("!(.*)\\n(.*)\\n.")
+		message := pdflatexErrorRegex.Find(commandResult.Bytes())
+		err = fmt.Errorf("Erreur dans l'expression : `%s`", strings.TrimPrefix(string(message), "! "))
 		return
 	}
 
@@ -54,19 +49,19 @@ func GenerateLatex(name string, heading string, expression string) (pngPath stri
 		"-quality", "90",
 		pdfPath, pngPath,
 	)
-	out = bytes.Buffer{}
-	convert.Stdout = &out
+	convert.Stdout = &commandResult
 	err = convert.Run()
-	if os.Getenv("ENV") == "dev" {
-		log.Println(out.String())
-	}
 	if err != nil {
-		log.Panicln("Error executing the convert imagick command: " + err.Error())
+		LogDebug(commandResult.String())
+		LogError("Error executing the convert command from ImageMagick: %v", err)
+		err = errors.New("Une erreur est survenue lors de l'exécution de la commande.")
+		return
 	}
 
 	file, err = os.Open(pngPath)
 	if err != nil {
-		log.Panicln("Error reading generated file: " + err.Error())
+		LogError("Error reading generated file at path %s: %v", pngPath, err)
+		err = errors.New("Une erreur est survenue lors de l'exécution de la commande.")
 	}
 	return
 }

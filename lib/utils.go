@@ -1,18 +1,17 @@
 package lib
 
 import (
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"regexp"
 
-	"github.com/fatih/color"
+	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Error sends a formatted error message in the Telegram chat
-func Error(bot *telegram.BotAPI, update *telegram.Update, message string) error {
+func Error(bot *telegram.BotAPI, update *telegram.Update, message string) (err error) {
 	msg := telegram.NewMessage(update.Message.Chat.ID, "❌ "+message)
 	msg.ParseMode = "Markdown"
-	_, err := bot.Send(msg)
-	return err
+	_, err = bot.Send(msg)
+	return
 }
 
 // ParseTelegramMessage escapes all the characters required to print MarkdownV2 content
@@ -37,12 +36,3 @@ func Contains(slice []string, text string) bool {
 
 	return false
 }
-
-// Red is a tool to display text in red, in order to indicate an error or an interruption
-var Red = color.New(color.FgRed)
-
-// Green is a tool to display text in green, in order to indicate a success or show the logo
-var Green = color.New(color.FgGreen)
-
-// Cyan is a tool to display text in cyan, in order to indicate an on-going task
-var Cyan = color.New(color.FgCyan)

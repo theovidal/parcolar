@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"log"
+	"context"
 	"os"
 	"strconv"
 
@@ -15,12 +15,16 @@ var Cache *redis.Client
 func OpenCache() {
 	db, err := strconv.Atoi(os.Getenv("CACHE_DB"))
 	if err != nil {
-		log.Panicln("‼ Error creating the cache: you must provide an integer for DB's number")
+		Fatal("Error creating the cache: you must provide an integer for DB's number")
 	}
 	Cache = redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("CACHE_ADDRESS") + ":" + os.Getenv("CACHE_PORT"),
 		Password: os.Getenv("CACHE_PASSWORD"),
 		DB:       db,
 	})
-	log.Println(Cyan.Sprint("💾 Opened Redis cache on port " + os.Getenv("CACHE_PORT")))
+
+	if err = Cache.Ping(context.Background()).Err(); err != nil {
+		Fatal("Error connecting to the cache: %s", err)
+	}
+	LogInfo("Opened Redis cache on port %s", os.Getenv("CACHE_PORT"))
 }

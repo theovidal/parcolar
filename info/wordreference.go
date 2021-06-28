@@ -2,7 +2,6 @@ package info
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -20,12 +19,12 @@ func WordReferenceCommand() lib.Command {
 	return lib.Command{
 		Name:        "translation",
 		Description: fmt.Sprintf("Obtenir la traduction d'un terme ou d'une expression (WordReference). Passez la langue source en premier argument, la langue cible en deuxième et le terme ou l'expression à la suite.\n\nLes langues disponibles sont : %s.", wordReferenceLanguagesDoc),
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, _ map[string]interface{}) error {
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, _ map[string]interface{}) (err error) {
 			if len(args) < 3 {
 				help := telegram.NewMessage(update.Message.Chat.ID, WordReferenceCommand().Help())
 				help.ParseMode = "Markdown"
-				_, err := bot.Send(help)
-				return err
+				_, err = bot.Send(help)
+				return
 			}
 			from := args[0]
 			to := args[1]
@@ -41,7 +40,7 @@ func WordReferenceCommand() lib.Command {
 
 			response, err := http.Get(fmt.Sprintf("%s/%s%s/%s", WordReferenceUrl, from, to, search))
 			if err != nil {
-				log.Fatal(err)
+				return
 			}
 			defer response.Body.Close()
 
@@ -54,7 +53,7 @@ func WordReferenceCommand() lib.Command {
 
 			document, err := goquery.NewDocumentFromReader(response.Body)
 			if err != nil {
-				log.Fatal(err)
+				return
 			}
 
 			audioSources := document.Find("audio source")
@@ -118,10 +117,10 @@ func WordReferenceCommand() lib.Command {
 				msg.ParseMode = "Markdown"
 				_, err = bot.Send(msg)
 				if err != nil {
-					return err
+					return
 				}
 			}
-			return nil
+			return
 		},
 	}
 }

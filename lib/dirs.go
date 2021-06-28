@@ -2,7 +2,6 @@ package lib
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -11,19 +10,19 @@ var WorkDir string
 
 // OpenDirs loads current and temporary directories
 func OpenDirs() {
-	temp, err := ioutil.TempDir("", "bacbot")
+	temp, err := ioutil.TempDir("", "parcolar-")
 	if err != nil {
-		log.Fatalln("Error opening temporary directory: " + err.Error())
+		Fatal("Error opening temporary directory: %s", err)
 	}
 	TempDir = temp
 	err = os.Chdir(TempDir)
 	if err != nil {
-		log.Panicln("Error accessing to temporary directory: " + err.Error())
+		Fatal("Error accessing to temporary directory: %s", err)
 	}
 
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatalln("Error opening working directory: " + err.Error())
+		Fatal("Error opening working directory: %s", err)
 	}
 	WorkDir = wd
 }

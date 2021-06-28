@@ -32,16 +32,16 @@ type Translation struct {
 func TranslateCommand() lib.Command {
 	return lib.Command{
 		Name:        "translate",
-		Description: fmt.Sprintf("Traduire un texte entier avec contexte (DeepL).\n\nLes langues sources disponibles sont : %s.\n\nLes langues cibles disponibles sont : %s.", sourceLanguagesDoc, targetLanguagesDoc),
+		Description: fmt.Sprintf("Traduire un texte entier avec contexte (DeepL).\n\nLes *langues sources* disponibles sont : %s.\n\nLes *langues cibles* disponibles sont : %s.", sourceLanguagesDoc, targetLanguagesDoc),
 		Flags: map[string]lib.Flag{
-			"source": {Description: "Manuellement inscrire la langue source", Value: ""},
+			"source": {"Manuellement inscrire la langue source", "", nil},
 		},
 		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) (err error) {
 			if len(args) < 2 {
 				help := telegram.NewMessage(update.Message.Chat.ID, TranslateCommand().Help())
 				help.ParseMode = "Markdown"
-				_, err := bot.Send(help)
-				return err
+				_, err = bot.Send(help)
+				return
 			}
 			from := strings.ToUpper(flags["source"].(string))
 			to := strings.ToUpper(args[0])
@@ -93,9 +93,9 @@ func TranslateCommand() lib.Command {
 				)
 			}
 
-			msg := telegram.NewMessage(update.Message.Chat.ID, content)
-			msg.ParseMode = "Markdown"
-			_, err = bot.Send(msg)
+			message := telegram.NewMessage(update.Message.Chat.ID, content)
+			message.ParseMode = "Markdown"
+			_, err = bot.Send(message)
 			return
 		},
 	}

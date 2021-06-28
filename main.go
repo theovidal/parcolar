@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/fatih/color"
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/theovidal/parcolar/info"
@@ -14,7 +15,7 @@ import (
 )
 
 func main() {
-	lib.Green.Println(" ________  ________  ________  ________  ________  ___       ________  ________     \n|\\   __  \\|\\   __  \\|\\   __  \\|\\   ____\\|\\   __  \\|\\  \\     |\\   __  \\|\\   __  \\    \n\\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\___|\\ \\  \\|\\  \\ \\  \\    \\ \\  \\|\\  \\ \\  \\|\\  \\   \n \\ \\   ____\\ \\   __  \\ \\   _  _\\ \\  \\    \\ \\  \\\\\\  \\ \\  \\    \\ \\   __  \\ \\   _  _\\  \n  \\ \\  \\___|\\ \\  \\ \\  \\ \\  \\\\  \\\\ \\  \\____\\ \\  \\\\\\  \\ \\  \\____\\ \\  \\ \\  \\ \\  \\\\  \\| \n   \\ \\__\\    \\ \\__\\ \\__\\ \\__\\\\ _\\\\ \\_______\\ \\_______\\ \\_______\\ \\__\\ \\__\\ \\__\\\\ _\\ \n    \\|__|     \\|__|\\|__|\\|__|\\|__|\\|_______|\\|_______|\\|_______|\\|__|\\|__|\\|__|\\|__|")
+	color.Green(" ________  ________  ________  ________  ________  ___       ________  ________     \n|\\   __  \\|\\   __  \\|\\   __  \\|\\   ____\\|\\   __  \\|\\  \\     |\\   __  \\|\\   __  \\    \n\\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\___|\\ \\  \\|\\  \\ \\  \\    \\ \\  \\|\\  \\ \\  \\|\\  \\   \n \\ \\   ____\\ \\   __  \\ \\   _  _\\ \\  \\    \\ \\  \\\\\\  \\ \\  \\    \\ \\   __  \\ \\   _  _\\  \n  \\ \\  \\___|\\ \\  \\ \\  \\ \\  \\\\  \\\\ \\  \\____\\ \\  \\\\\\  \\ \\  \\____\\ \\  \\ \\  \\ \\  \\\\  \\| \n   \\ \\__\\    \\ \\__\\ \\__\\ \\__\\\\ _\\\\ \\_______\\ \\_______\\ \\_______\\ \\__\\ \\__\\ \\__\\\\ _\\ \n    \\|__|     \\|__|\\|__|\\|__|\\|__|\\|_______|\\|_______|\\|_______|\\|__|\\|__|\\|__|\\|__|")
 	lib.LoadEnv(".env")
 	lib.OpenCache()
 
@@ -28,11 +29,12 @@ func main() {
 		log.Panic(err)
 	}
 
-	if os.Getenv("ENV") == "dev" {
+	if os.Getenv("DEBUG") == "true" {
 		bot.Debug = true
+		lib.StandardLogger.Debug = true
 	}
 
-	log.Println(lib.Green.Sprintf("✅ Authorized on account %s", bot.Self.UserName))
+	lib.LogSuccess("Authorized on account %s", bot.Self.UserName)
 
 	go pronote.TimetableLoop(bot)
 
@@ -44,14 +46,17 @@ func main() {
 	go func() {
 		for update := range updates {
 			if update.InlineQuery != nil {
-				info.ParcoursupCommand(bot, &update)
+				err = info.ParcoursupCommand(bot, &update)
+				if err != nil {
+					lib.LogError("Error handling an inline request: %s", err)
+				}
 			} else if update.Message.IsCommand() {
 				if update.Message.From.UserName != os.Getenv("TELEGRAM_USER") {
 					continue
 				}
-				err := HandleCommand(bot, update, false)
-				if err != nil && bot.Debug {
-					log.Println(lib.Red.Sprintf("‼ Error handling a command: %s", err))
+				err = HandleCommand(bot, update, false)
+				if err != nil {
+					lib.LogError("Error handling a command: %s", err)
 				}
 			}
 		}
@@ -62,5 +67,5 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	log.Println(lib.Cyan.Sprintf("💤 Closing down bot"))
+	lib.LogInfo("Gracefully shutting down bot 💤")
 }

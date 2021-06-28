@@ -1,8 +1,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -23,10 +23,10 @@ var commandsList = map[string]lib.Command{
 
 	// ―――――― Mathematics ――――――
 	"calc":  math.CalcCommand(),
-	"plot":  math.PlotCommand(),
 	"latex": math.LatexCommand(),
+	"plot":  math.PlotCommand(),
 
-	// ―――――― Pronote ――――――
+	// ―――――― PRONOTE ――――――
 	"contents":       pronote.ContentsCommand(),
 	"homework":       pronote.HomeworkCommand(),
 	"timetable":      pronote.TimetableCommand(),
@@ -34,7 +34,7 @@ var commandsList = map[string]lib.Command{
 }
 
 // HandleCommand parses an incoming request to execute a bot command
-func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool) error {
+func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool) (err error) {
 	var commandName string
 	var args []string
 
@@ -51,12 +51,10 @@ func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool
 
 	command, exists := commandsList[commandName]
 	if !exists {
-		_, err := bot.Send(telegram.NewMessage(update.Message.Chat.ID, "❓ Oups, il semble que cette commande soit inconnue!"))
-		return err
+		return lib.Error(bot, &update, "Oups, il semble que cette commande soit inconnue!")
 	}
 
 	var flags map[string]interface{}
-	var err error
 	args, flags, err = ParseFlags(args, command.Flags)
 	if err != nil {
 		return lib.Error(bot, &update, err.Error())
@@ -66,60 +64,73 @@ func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool
 }
 
 // ParseFlags extracts flags at the beginning of the command, holding customizable parameters
-func ParseFlags(args []string, commandFlags map[string]lib.Flag) ([]string, map[string]interface{}, error) {
-	flags := make(map[string]interface{})
+func ParseFlags(args []string, flags map[string]lib.Flag) (parsedArgs []string, parsedFlags map[string]interface{}, err error) {
+	parsedFlags = make(map[string]interface{})
 
-	if commandFlags == nil || len(commandFlags) == 0 {
-		for name, flag := range commandFlags {
-			flags[name] = flag.Value
+	if flags == nil || len(flags) == 0 {
+		for name, flag := range flags {
+			parsedFlags[name] = flag.Value
 		}
-		return args, flags, nil
+		return args, parsedFlags, nil
 	}
 
 	for index, arg := range args {
 		if !strings.Contains(arg, "=") {
-			args = args[index:]
-			break
+			parsedArgs = append(parsedArgs, args[index])
+			continue
 		}
 
 		parts := strings.Split(arg, "=")
 		name := parts[0]
-		flag, found := commandFlags[name]
+		flag, found := flags[name]
 		if !found {
-			return nil, nil, errors.New(fmt.Sprintf("Le paramètre `%s` est inexistant. Vérifiez son orthographe ou consultez la liste des paramètres possibles avec `/help plot`.", name))
+			parsedArgs = append(parsedArgs, args[index])
+			continue
 		}
 
 		var value interface{}
 		switch flag.Value.(type) {
 		case float64:
-			var err error
 			value, err = strconv.ParseFloat(parts[1], 64)
 			if err != nil {
-				return nil, nil, errors.New(fmt.Sprintf("Le paramètre `%s` attend un nombre réel comme valeur.", name))
+				err = fmt.Errorf("Le paramètre `%s` attend un nombre réel comme valeur.", name)
+				return
 			}
-		case int:
-			var err error
+		case int, bool:
 			value, err = strconv.Atoi(parts[1])
 			if err != nil {
-				return nil, nil, errors.New(fmt.Sprintf("Le paramètre `%s` attend un nombre entier comme valeur.", name))
+				err = fmt.Errorf("Le paramètre `%s` attend un nombre entier comme valeur.", name)
+				return
+			}
+
+			if reflect.TypeOf(flag.Value).Name() == "bool" {
+				if value == 0 {
+					value = false
+				} else if value == 1 {
+					value = true
+				} else {
+					err = fmt.Errorf("Le paramètre `%s` attend un booléen (0 ou 1) comme valeur.", name)
+					return
+				}
 			}
 		case string:
 			value = parts[1]
 			if exists := lib.Contains(*flag.Enum, value.(string)); !exists && flag.Enum != nil && len(*flag.Enum) > 0 {
-				return nil, nil, errors.New(fmt.Sprintf("Les valeurs acceptées pour le paramètre `%s` sont : %s.", name, strings.Join(*flag.Enum, ", ")))
+				err = fmt.Errorf("Les valeurs acceptées pour le paramètre `%s` sont : %s.", name, strings.Join(*flag.Enum, ", "))
+				return
 			}
 		default:
-			panic("Unhandled type for flag " + name)
+			lib.Fatal("Unhandled type for flag %s", name)
 		}
 
-		flags[name] = value
+		parsedFlags[name] = value
 	}
 
-	for flag, defaultFlag := range commandFlags {
-		if _, set := flags[flag]; !set {
-			flags[flag] = defaultFlag.Value
+	for flag, defaultFlag := range flags {
+		if _, set := parsedFlags[flag]; !set {
+			parsedFlags[flag] = defaultFlag.Value
 		}
 	}
 
-	return args, flags, nil
+	return
 }

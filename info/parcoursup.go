@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -55,7 +54,7 @@ type ParcoursupRecord struct {
 }
 
 // SearchParcoursup queries the API to search for courses on Parcoursup
-func SearchParcoursup(query string) (result ParcoursupResponse) {
+func SearchParcoursup(query string) (result ParcoursupResponse, err error) {
 	request, _ := http.NewRequest(
 		"GET",
 		lib.EncodeURL(ParcoursupUrl, map[string]string{
@@ -79,8 +78,12 @@ func SearchParcoursup(query string) (result ParcoursupResponse) {
 }
 
 // ParcoursupCommand processes an inline query from a user and returns the results for them to choose from
-func ParcoursupCommand(bot *telegram.BotAPI, update *telegram.Update) {
-	records := SearchParcoursup(update.InlineQuery.Query).Records
+func ParcoursupCommand(bot *telegram.BotAPI, update *telegram.Update) (err error) {
+	response, err := SearchParcoursup(update.InlineQuery.Query)
+	if err != nil {
+		return
+	}
+	records := response.Records
 
 	var results []interface{}
 	for _, record := range records {
@@ -111,11 +114,9 @@ func ParcoursupCommand(bot *telegram.BotAPI, update *telegram.Update) {
 		})
 	}
 
-	_, err := bot.AnswerInlineQuery(telegram.InlineConfig{
+	_, err = bot.AnswerInlineQuery(telegram.InlineConfig{
 		InlineQueryID: update.InlineQuery.ID,
 		Results:       results,
 	})
-	if err != nil {
-		log.Println(err)
-	}
+	return
 }
