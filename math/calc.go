@@ -20,12 +20,12 @@ func CalcCommand() lib.Command {
 			"sf":  {"Nombre de chiffres après la virgule", 2, nil},
 			"sci": {"Activer la notation scientifique (0 ou 1)", false, nil},
 		},
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) (err error) {
 			if len(args) == 0 {
 				help := telegram.NewMessage(update.Message.Chat.ID, CalcCommand().Help())
 				help.ParseMode = "Markdown"
-				_, err := bot.Send(help)
-				return err
+				_, err = bot.Send(help)
+				return
 			}
 
 			expression := strings.Join(args, " ")
@@ -46,7 +46,7 @@ func CalcCommand() lib.Command {
 			}
 			message := telegram.NewMessage(update.Message.Chat.ID, fmt.Sprintf(format, result))
 			_, err = bot.Send(message)
-			return err
+			return
 		},
 	}
 }
