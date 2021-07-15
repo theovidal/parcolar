@@ -17,7 +17,7 @@ import (
 func TimetableLoop(bot *telegram.BotAPI) {
 	for range time.Tick(time.Minute * 10) {
 		if err := TimetableTicker(bot); err != nil {
-			lib.LogError("‼ Error handling timetable ticker: %s", err)
+			lib.LogError("Error handling timetable ticker: %s", err)
 		}
 	}
 }

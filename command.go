@@ -12,6 +12,7 @@ import (
 	"github.com/theovidal/parcolar/lib"
 	"github.com/theovidal/parcolar/math"
 	"github.com/theovidal/parcolar/pronote"
+	"github.com/theovidal/parcolar/wolfram"
 )
 
 // commandsList stores the commands available on the Telegram bot
@@ -20,6 +21,8 @@ var commandsList = map[string]lib.Command{
 	"definition":    info.DefinitionCommand(),
 	"translate":     info.TranslateCommand(),
 	"wordreference": info.WordReferenceCommand(),
+
+	"wolfram": wolfram.Command(),
 
 	// ―――――― Mathematics ――――――
 	"calc":  math.CalcCommand(),

@@ -10,6 +10,7 @@ require (
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/jinzhu/now v1.1.1
 	github.com/joho/godotenv v1.3.0
+	github.com/ozankasikci/go-image-merge v0.2.2 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/vdobler/chart v1.0.0
 	golang.org/x/image v0.0.0-20201208152932-35266b937fa6 // indirect
