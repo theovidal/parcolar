@@ -20,12 +20,9 @@ func LatexCommand() lib.Command {
 			"background": {"Couleur de l'arrière-plan", "white", &data.Colors},
 			"text":       {"Couleur du texte", "black", &data.Colors},
 		},
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) (err error) {
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) (err error) {
 			if len(args) == 0 {
-				help := telegram.NewMessage(update.Message.Chat.ID, LatexCommand().Help())
-				help.ParseMode = "Markdown"
-				_, err = bot.Send(help)
-				return
+				return lib.Help(bot, chatID, LatexCommand())
 			}
 
 			backgroundColor, textColor := flags["background"].(string), flags["text"].(string)
@@ -37,14 +34,14 @@ func LatexCommand() lib.Command {
 				expression,
 			)
 			if err != nil {
-				return lib.Error(bot, update, err.Error())
+				return lib.Error(bot, chatID, err.Error())
 			}
 			photoReader := telegram.FileReader{
 				Name:   "expression.png",
 				Reader: photo,
 				Size:   -1,
 			}
-			photoUpload := telegram.NewPhotoUpload(update.Message.Chat.ID, photoReader)
+			photoUpload := telegram.NewPhotoUpload(chatID, photoReader)
 			_, err = bot.Send(photoUpload)
 			os.Remove(path)
 			return

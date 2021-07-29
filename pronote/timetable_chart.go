@@ -13,14 +13,14 @@ func TimetableChartCommand() lib.Command {
 	return lib.Command{
 		Name:        "timetable_chart",
 		Description: "Cette commande permet de tracer un diagramme en camembert (ou en quartiers) afin de visualiser le volume horaire des matières dans l'emploi du temps.",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, _ []string, _ map[string]interface{}) (err error) {
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, _ []string, _ map[string]interface{}) (err error) {
 			response, err := api.GetTimetable(now.BeginningOfWeek(), now.EndOfWeek())
 			if err != nil {
-				return lib.Error(bot, update, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
+				return lib.Error(bot, chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Timetable) == 0 {
-				message := telegram.NewMessage(update.Message.Chat.ID, "🍃 Aucun cours n'est prévu pour le moment.")
+				message := telegram.NewMessage(chatID, "🍃 Aucun cours n'est prévu pour le moment.")
 				_, err = bot.Send(message)
 				return
 			}
@@ -52,7 +52,7 @@ func TimetableChartCommand() lib.Command {
 			pieChart.FmtVal = chart.PercentValue
 
 			file := lib.Plot(&pieChart, "timetable_chart")
-			photoUpload := telegram.NewPhotoUpload(update.Message.Chat.ID, file)
+			photoUpload := telegram.NewPhotoUpload(chatID, file)
 			_, err = bot.Send(photoUpload)
 			return
 		},

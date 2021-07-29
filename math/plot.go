@@ -30,12 +30,9 @@ func PlotCommand() lib.Command {
 
 			"grid": {"Afficher la grille sur le graphique (0 ou 1)", true, nil},
 		},
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) error {
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) error {
 			if len(args) == 0 {
-				help := telegram.NewMessage(update.Message.Chat.ID, PlotCommand().Help())
-				help.ParseMode = "Markdown"
-				_, err := bot.Send(help)
-				return err
+				return lib.Help(bot, chatID, PlotCommand())
 			}
 
 			grid := flags["grid"].(bool)
@@ -70,14 +67,14 @@ func PlotCommand() lib.Command {
 
 			for _, function := range functions {
 				if err := data.CheckExpression(function); err != nil {
-					return lib.Error(bot, update, err.Error())
+					return lib.Error(bot, chatID, err.Error())
 				}
 				if _, err := data.Evaluate(function, 1); err != nil {
-					return lib.Error(bot, update, err.Error())
+					return lib.Error(bot, chatID, err.Error())
 				}
 			}
 
-			config := telegram.NewMessage(update.Message.Chat.ID, "_Génération du graphique en cours..._")
+			config := telegram.NewMessage(chatID, "_Génération du graphique en cours..._")
 			config.ParseMode = "Markdown"
 			waiter, _ := bot.Send(config)
 
@@ -97,7 +94,7 @@ func PlotCommand() lib.Command {
 			}
 
 			file := lib.Plot(&plot, "function_plot")
-			photo := telegram.NewPhotoUpload(update.Message.Chat.ID, file)
+			photo := telegram.NewPhotoUpload(chatID, file)
 			_, err := bot.Send(photo)
 			if err != nil {
 				return err

@@ -50,6 +50,11 @@ func main() {
 				if err != nil {
 					lib.LogError("Error handling an inline request: %s", err)
 				}
+			} else if update.CallbackQuery != nil {
+				err = HandleCommand(bot, update, true)
+				if err != nil {
+					lib.LogError("Error handling a callback: %s", err)
+				}
 			} else if update.Message.IsCommand() {
 				if update.Message.From.UserName != os.Getenv("TELEGRAM_USER") {
 					continue

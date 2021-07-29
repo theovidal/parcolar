@@ -19,23 +19,20 @@ func WordReferenceCommand() lib.Command {
 	return lib.Command{
 		Name:        "translation",
 		Description: fmt.Sprintf("Obtenir la traduction d'un terme ou d'une expression (WordReference). Passez la langue source en premier argument, la langue cible en deuxième et le terme ou l'expression à la suite.\n\nLes langues disponibles sont : %s.", wordReferenceLanguagesDoc),
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, _ map[string]interface{}) (err error) {
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, _ map[string]interface{}) (err error) {
 			if len(args) < 3 {
-				help := telegram.NewMessage(update.Message.Chat.ID, WordReferenceCommand().Help())
-				help.ParseMode = "Markdown"
-				_, err = bot.Send(help)
-				return
+				return lib.Help(bot, chatID, WordReferenceCommand())
 			}
 			from := args[0]
 			to := args[1]
 			search := strings.Join(args[2:], " ")
 
 			if _, exists := wordReferenceLanguages[from]; !exists {
-				return lib.Error(bot, update, "La langue source est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
+				return lib.Error(bot, chatID, "La langue source est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
 			}
 
 			if _, exists := wordReferenceLanguages[to]; !exists {
-				return lib.Error(bot, update, "La langue cible est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
+				return lib.Error(bot, chatID, "La langue cible est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
 			}
 
 			response, err := http.Get(fmt.Sprintf("%s/%s%s/%s", WordReferenceUrl, from, to, search))
@@ -45,10 +42,10 @@ func WordReferenceCommand() lib.Command {
 			defer response.Body.Close()
 
 			if response.StatusCode == 404 {
-				return lib.Error(bot, update, "La combinaison de langues est inconnue.")
+				return lib.Error(bot, chatID, "La combinaison de langues est inconnue.")
 			}
 			if response.StatusCode != 200 {
-				return lib.Error(bot, update, "Une erreur inconnue s'est produite lors de la recherche dans le dictionnaire.")
+				return lib.Error(bot, chatID, "Une erreur inconnue s'est produite lors de la recherche dans le dictionnaire.")
 			}
 
 			document, err := goquery.NewDocumentFromReader(response.Body)
@@ -78,7 +75,7 @@ func WordReferenceCommand() lib.Command {
 
 			selection := document.Find("table.WRD tbody tr:not(.wrtopsection,.langHeader)")
 			if selection.Length() == 0 {
-				return lib.Error(bot, update, "Aucune traduction trouvée pour ce terme ou cette expression.")
+				return lib.Error(bot, chatID, "Aucune traduction trouvée pour ce terme ou cette expression.")
 			}
 
 			selection.Each(func(_ int, element *goquery.Selection) {
@@ -113,7 +110,7 @@ func WordReferenceCommand() lib.Command {
 			})
 
 			for _, content := range messages {
-				msg := telegram.NewMessage(update.Message.Chat.ID, content)
+				msg := telegram.NewMessage(chatID, content)
 				msg.ParseMode = "Markdown"
 				_, err = bot.Send(msg)
 				if err != nil {

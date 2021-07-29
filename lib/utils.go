@@ -6,9 +6,17 @@ import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// Help sends a formatted help message in the Telegram chat
+func Help(bot *telegram.BotAPI, chatID int64, command Command) (err error) {
+	help := telegram.NewMessage(chatID, command.Help())
+	help.ParseMode = "Markdown"
+	_, err = bot.Send(help)
+	return
+}
+
 // Error sends a formatted error message in the Telegram chat
-func Error(bot *telegram.BotAPI, update *telegram.Update, message string) (err error) {
-	msg := telegram.NewMessage(update.Message.Chat.ID, "❌ "+message)
+func Error(bot *telegram.BotAPI, chatID int64, message string) (err error) {
+	msg := telegram.NewMessage(chatID, "❌ "+message)
 	msg.ParseMode = "Markdown"
 	_, err = bot.Send(msg)
 	return

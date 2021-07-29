@@ -14,15 +14,15 @@ func TimetableCommand() lib.Command {
 	return lib.Command{
 		Name:        "timetable",
 		Description: "Cette commande permet d'obtenir l'emploi du temps complet sur les 7 prochains jours, avec leur statut à jour et le mode présentiel/distanciel.",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, args []string, flags map[string]interface{}) (err error) {
+		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) (err error) {
 			response, err := api.GetTimetable(time.Now(), time.Now().Add(time.Hour*24*6))
 			if err != nil {
 				lib.LogError(err.Error())
-				return lib.Error(bot, update, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
+				return lib.Error(bot, chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Timetable) == 0 {
-				msg := telegram.NewMessage(update.Message.Chat.ID, "🍃 Aucun cours n'est prévu pour le moment.")
+				msg := telegram.NewMessage(chatID, "🍃 Aucun cours n'est prévu pour le moment.")
 				_, err = bot.Send(msg)
 				return
 			}
@@ -39,7 +39,7 @@ func TimetableCommand() lib.Command {
 				content += fmt.Sprintf("*―――――― %s ――――――*\n%s\n", day, lessons)
 			}
 
-			msg := telegram.NewMessage(update.Message.Chat.ID, content)
+			msg := telegram.NewMessage(chatID, content)
 			msg.ParseMode = "MarkdownV2"
 			_, err = bot.Send(msg)
 			return

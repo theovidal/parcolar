@@ -40,30 +40,33 @@ var commandsList = map[string]lib.Command{
 func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool) (err error) {
 	var commandName string
 	var args []string
+	var chatID int64
 
 	if isCallback {
 		parts := strings.Split(strings.TrimPrefix(update.CallbackQuery.Data, "/"), " ")
 		commandName = parts[0]
 		args = parts[1:]
+		chatID = update.CallbackQuery.Message.Chat.ID
 	} else {
 		commandName = update.Message.Command()
 		if update.Message.CommandArguments() != "" {
 			args = strings.Split(update.Message.CommandArguments(), " ")
 		}
+		chatID = update.Message.Chat.ID
 	}
 
 	command, exists := commandsList[commandName]
 	if !exists {
-		return lib.Error(bot, &update, "Oups, il semble que cette commande soit inconnue!")
+		return lib.Error(bot, chatID, "Oups, il semble que cette commande soit inconnue!")
 	}
 
 	var flags map[string]interface{}
 	args, flags, err = ParseFlags(args, command.Flags)
 	if err != nil {
-		return lib.Error(bot, &update, err.Error())
+		return lib.Error(bot, chatID, err.Error())
 	}
 
-	return command.Execute(bot, &update, args, flags)
+	return command.Execute(bot, &update, chatID, args, flags)
 }
 
 // ParseFlags extracts flags at the beginning of the command, holding customizable parameters
