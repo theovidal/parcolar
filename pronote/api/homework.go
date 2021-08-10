@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-redis/redis/v8"
+
 	"github.com/theovidal/parcolar/lib"
 )
 
@@ -44,7 +46,7 @@ func (homework *Homework) String() (output string) {
 }
 
 // GetHomework fetches the homework to do for the next 15 days
-func GetHomework() (Data, error) {
+func GetHomework(cache *redis.Client, days int) (Data, error) {
 	query := ParseGraphQL(fmt.Sprintf(`
 		{
 			homeworks(from: "%s", to: "%s") {
@@ -58,9 +60,9 @@ func GetHomework() (Data, error) {
 				}
 			}
 		}
-	`, time.Now().Format("2006-01-02"), time.Now().Add(time.Hour*24*15).Format("2006-01-02")),
+	`, time.Now().Format("2006-01-02"), time.Now().AddDate(0, 0, days).Format("2006-01-02")),
 	)
 
-	response, err := MakeRequest(query)
+	response, err := MakeRequest(cache, query)
 	return response.Data, err
 }

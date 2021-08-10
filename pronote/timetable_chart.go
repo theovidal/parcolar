@@ -3,6 +3,7 @@ package pronote
 import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/jinzhu/now"
+	"github.com/theovidal/parcolar/math/src"
 	"github.com/vdobler/chart"
 
 	"github.com/theovidal/parcolar/lib"
@@ -12,11 +13,11 @@ import (
 func TimetableChartCommand() lib.Command {
 	return lib.Command{
 		Name:        "timetable_chart",
-		Description: "Cette commande permet de tracer un diagramme en camembert (ou en quartiers) afin de visualiser le volume horaire des matières dans l'emploi du temps.",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, _ []string, _ map[string]interface{}) (err error) {
-			response, err := api.GetTimetable(now.BeginningOfWeek(), now.EndOfWeek())
+		Description: "Tracer un diagramme en camembert (ou en quartiers) pour visualiser le volume horaire des matières dans l'emploi du temps de la semaine en cours.",
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, _ []string, _ map[string]interface{}) (err error) {
+			response, err := api.GetTimetable(bot.Cache, now.BeginningOfWeek(), now.EndOfWeek())
 			if err != nil {
-				return lib.Error(bot, chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
+				return bot.Error(chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Timetable) == 0 {
@@ -51,7 +52,7 @@ func TimetableChartCommand() lib.Command {
 			pieChart.Inner = 0.7
 			pieChart.FmtVal = chart.PercentValue
 
-			file := lib.Plot(&pieChart, "timetable_chart")
+			file := src.Plot(&pieChart, "timetable_chart")
 			photoUpload := telegram.NewPhotoUpload(chatID, file)
 			_, err = bot.Send(photoUpload)
 			return

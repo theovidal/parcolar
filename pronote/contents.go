@@ -12,12 +12,15 @@ import (
 func ContentsCommand() lib.Command {
 	return lib.Command{
 		Name:        "contents",
-		Description: "Cette commande permet d'obtenir les contenus des cours des 5 derniers jours.",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, _ []string, _ map[string]interface{}) (err error) {
-			response, err := api.GetContents()
+		Description: "Obtenir les contenus des cours des 5 derniers jours.",
+		Flags: map[string]lib.Flag{
+			"days": {"Nombre de jours en arrière (sans compter aujourd'hui)", 4, nil},
+		},
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, _ []string, flags map[string]interface{}) (err error) {
+			response, err := api.GetContents(bot.Cache, flags["days"].(int))
 			if err != nil {
 				lib.LogError(err.Error())
-				return lib.Error(bot, chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
+				return bot.Error(chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Contents) == 0 {

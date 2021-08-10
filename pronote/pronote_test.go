@@ -12,9 +12,9 @@ import (
 
 func TestGetHomework(t *testing.T) {
 	lib.LoadEnv("../.env")
-	lib.OpenCache()
+	cache := lib.OpenCache()
 
-	response, err := api.GetHomework()
+	response, err := api.GetHomework(cache)
 	if err != nil {
 		t.Error(err)
 	}
@@ -24,9 +24,9 @@ func TestGetHomework(t *testing.T) {
 
 func TestGetTimetable(t *testing.T) {
 	lib.LoadEnv("../.env")
-	lib.OpenCache()
+	cache := lib.OpenCache()
 
-	response, err := api.GetTimetable(now.BeginningOfWeek(), now.EndOfWeek())
+	response, err := api.GetTimetable(cache, now.BeginningOfWeek(), now.EndOfWeek())
 	if err != nil {
 		t.Error(err)
 	}

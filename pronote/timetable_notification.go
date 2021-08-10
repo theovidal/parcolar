@@ -14,7 +14,7 @@ import (
 )
 
 // TimetableLoop runs the TimetableTicker every 10 minutes, and is meant to be used in a goroutine.
-func TimetableLoop(bot *telegram.BotAPI) {
+func TimetableLoop(bot *lib.Bot) {
 	for range time.Tick(time.Minute * 10) {
 		if err := TimetableTicker(bot); err != nil {
 			lib.LogError("Error handling timetable ticker: %s", err)
@@ -23,8 +23,8 @@ func TimetableLoop(bot *telegram.BotAPI) {
 }
 
 // TimetableTicker periodically fetches the timetable on PRONOTE for upcoming lessons, and sends a notification if there is one in the next 10 minutes
-func TimetableTicker(bot *telegram.BotAPI) (err error) {
-	response, err := api.GetTimetable(now.BeginningOfDay(), now.BeginningOfDay().Add(time.Hour*26))
+func TimetableTicker(bot *lib.Bot) (err error) {
+	response, err := api.GetTimetable(bot.Cache, now.BeginningOfDay(), now.BeginningOfDay().Add(time.Hour*26))
 	if err != nil || len(response.Timetable) == 0 {
 		return
 	}

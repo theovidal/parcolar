@@ -10,12 +10,15 @@ import (
 func HomeworkCommand() lib.Command {
 	return lib.Command{
 		Name:        "homework",
-		Description: "Cette commande permet d'obtenir tous les devoirs saisis sur PRONOTE pour les 15 prochains jours.",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, _ []string, _ map[string]interface{}) (err error) {
-			response, err := api.GetHomework()
+		Description: "Obtenir tous les devoirs saisis sur PRONOTE pour les prochains jours.",
+		Flags: map[string]lib.Flag{
+			"days": {"Nombre de jours à obtenir (sans compter aujourd'hui)", 14, nil},
+		},
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, _ []string, flags map[string]interface{}) (err error) {
+			response, err := api.GetHomework(bot.Cache, flags["days"].(int))
 			if err != nil {
 				lib.LogError(err.Error())
-				return lib.Error(bot, chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
+				return bot.Error(chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Homeworks) == 0 {

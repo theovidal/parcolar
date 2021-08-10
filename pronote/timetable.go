@@ -13,12 +13,15 @@ import (
 func TimetableCommand() lib.Command {
 	return lib.Command{
 		Name:        "timetable",
-		Description: "Cette commande permet d'obtenir l'emploi du temps complet sur les 7 prochains jours, avec leur statut à jour et le mode présentiel/distanciel.",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) (err error) {
-			response, err := api.GetTimetable(time.Now(), time.Now().Add(time.Hour*24*6))
+		Description: "Oobtenir l'emploi du temps complet sur les prochains jours, avec leur statut à jour et le mode présentiel/distanciel.",
+		Flags: map[string]lib.Flag{
+			"days": {"Nombre de jours à obtenir (sans compter aujourd'hui)", 6, nil},
+		},
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) (err error) {
+			response, err := api.GetTimetable(bot.Cache, time.Now(), time.Now().AddDate(0, 0, flags["days"].(int)))
 			if err != nil {
 				lib.LogError(err.Error())
-				return lib.Error(bot, chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
+				return bot.Error(chatID, "Erreur serveur : impossible d'effectuer la requête vers PRONOTE.")
 			}
 
 			if len(response.Timetable) == 0 {

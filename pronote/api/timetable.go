@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-redis/redis/v8"
+
 	"github.com/theovidal/parcolar/lib"
 )
 
@@ -51,7 +53,7 @@ func (lesson *Lesson) String() (output string) {
 }
 
 // GetTimetable fetches the timetable for the next 7 days
-func GetTimetable(from time.Time, to time.Time) (Data, error) {
+func GetTimetable(cache *redis.Client, from time.Time, to time.Time) (Data, error) {
 	query := ParseGraphQL(fmt.Sprintf(`
 		{
 			timetable(from: "%s", to: "%s") {
@@ -68,6 +70,6 @@ func GetTimetable(from time.Time, to time.Time) (Data, error) {
 	`, from.Format("2006-01-02"), to.Format("2006-01-02")),
 	)
 
-	response, err := MakeRequest(query)
+	response, err := MakeRequest(cache, query)
 	return response.Data, err
 }

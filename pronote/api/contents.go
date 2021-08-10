@@ -3,6 +3,8 @@ package api
 import (
 	"fmt"
 	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 // Content stores the content of a passed lesson
@@ -47,7 +49,7 @@ func (content *Content) String() (output string) {
 }
 
 // GetContents fetches lesson contents for the past 5 days
-func GetContents() (Data, error) {
+func GetContents(cache *redis.Client, days int) (Data, error) {
 	query := ParseGraphQL(fmt.Sprintf(`
 		{
 			contents(from: "%s", to: "%s") {
@@ -68,10 +70,10 @@ func GetContents() (Data, error) {
 				}
 			}
 		}
-	`, time.Now().AddDate(0, 0, -4).Format("2006-01-02"), time.Now().Format("2006-01-02")),
+	`, time.Now().AddDate(0, 0, -days).Format("2006-01-02"), time.Now().Format("2006-01-02")),
 	)
 
-	response, err := MakeRequest(query)
+	response, err := MakeRequest(cache, query)
 	return response.Data, err
 }
 
@@ -79,7 +81,7 @@ func GetContents() (Data, error) {
 type Contents []Content
 
 // Reverse sorts Content objects to reverse their order in a list
-func (c Contents) Reverse() Contents {
+func (c Contents) Reverse() []Content {
 	for i := 0; i < len(c)/2; i++ {
 		j := len(c) - i - 1
 		c[i], c[j] = c[j], c[i]
