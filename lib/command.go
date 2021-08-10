@@ -21,7 +21,7 @@ type Command struct {
 
 // Help generates the help string for the command
 func (c Command) Help() (content string) {
-	content = fmt.Sprintf("*―――――― Aide de la commande %s ――――――*\n%s", c.Name, c.Description)
+	content = fmt.Sprintf("*―――――― ❓ Aide : %s ――――――*\n%s", c.Name, c.Description)
 
 	if len(c.Flags) > 0 {
 		content += "\n\nListe des paramètres disponibles sur cette commande :\n"

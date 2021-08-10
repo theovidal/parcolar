@@ -22,8 +22,6 @@ func main() {
 	lib.OpenDirs()
 	defer os.RemoveAll(lib.TempDir)
 
-	commandsList["help"] = HelpCommand()
-
 	bot, err := telegram.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
 	if err != nil {
 		log.Panic(err)
