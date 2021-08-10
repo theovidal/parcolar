@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
+
 	"github.com/theovidal/parcolar/lib"
 )
 
@@ -12,16 +13,16 @@ func Command() lib.Command {
 	return lib.Command{
 		Name:        "wolfram",
 		Description: "Réaliser une requête en utilisant la version en ligne de Wolfram|Alpha et compte gratuit : par conséquent, certaines fonctionnalités ne seront disponibles. L'outil est efficace pour toutes recherches générales, et les calculs mathématiques sans étapes.",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, _ map[string]interface{}) (err error) {
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, args []string, _ map[string]interface{}) (err error) {
 			if len(args) == 0 {
-				return lib.Help(bot, chatID, Command())
+				return bot.Help(chatID, "wolfram")
 			}
 
 			query := strings.Join(args, " ")
 			result, err := makeRequest(query)
 			if err != nil {
 				lib.LogError(err.Error())
-				return lib.Error(bot, chatID, "Une erreur est survenue lors de la requête.")
+				return bot.Error(chatID, "Une erreur est survenue lors de la requête.")
 			}
 
 			if result.HasSuccess && !result.HasError {
@@ -49,7 +50,7 @@ func Command() lib.Command {
 
 					if _, err = bot.Send(media); err != nil {
 						lib.LogError(err.Error())
-						return lib.Error(bot, chatID, "Une erreur est survenue lors de l'envoi des photos.")
+						return bot.Error(chatID, "Une erreur est survenue lors de l'envoi des photos.")
 					}
 				}
 			}
@@ -87,7 +88,7 @@ func Command() lib.Command {
 			}
 
 			if !result.HasSuccess && result.HasError {
-				return lib.Error(bot, chatID, fmt.Sprintf("Erreurs sur la requête : `%s`.", result.Error.Content))
+				return bot.Error(chatID, fmt.Sprintf("Erreurs sur la requête : `%s`.", result.Error.Content))
 			}
 
 			return

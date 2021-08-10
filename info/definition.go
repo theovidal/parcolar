@@ -18,9 +18,9 @@ func DefinitionCommand() lib.Command {
 	return lib.Command{
 		Name:        "definition",
 		Description: "Obtenir la définition d'un terme dans le dictionnaire (Larousse)",
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) (err error) {
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) (err error) {
 			if len(args) == 0 {
-				return lib.Error(bot, chatID, "Merci d'indiquer un terme pour en chercher la définition dans le dictionnaire.")
+				return bot.Error(chatID, "Merci d'indiquer un terme pour en chercher la définition dans le dictionnaire.")
 			}
 
 			word := args[0]
@@ -30,7 +30,7 @@ func DefinitionCommand() lib.Command {
 			}
 			defer response.Body.Close()
 			if response.StatusCode != 200 {
-				return lib.Error(bot, chatID, "Une erreur inconnue s'est produite lors de la recherche dans le dictionnaire.")
+				return bot.Error(chatID, "Une erreur inconnue s'est produite lors de la recherche dans le dictionnaire.")
 			}
 
 			document, err := goquery.NewDocumentFromReader(response.Body)
@@ -40,7 +40,7 @@ func DefinitionCommand() lib.Command {
 
 			selection := document.Find("ul.Definitions li")
 			if selection.Length() == 0 {
-				return lib.Error(bot, chatID, "Aucune définition trouvée pour ce terme. Vérifiez l'orthographe de celui-ci ou découpez l'expression en plusieurs parties.")
+				return bot.Error(chatID, "Aucune définition trouvée pour ce terme. Vérifiez l'orthographe de celui-ci ou découpez l'expression en plusieurs parties.")
 			}
 
 			content := fmt.Sprintf("*―――――― 📜 %s ――――――*\n", strings.ToUpper(word))

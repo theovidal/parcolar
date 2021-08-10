@@ -19,20 +19,20 @@ func WordReferenceCommand() lib.Command {
 	return lib.Command{
 		Name:        "translation",
 		Description: fmt.Sprintf("Obtenir la traduction d'un terme ou d'une expression (WordReference). Passez la langue source en premier argument, la langue cible en deuxième et le terme ou l'expression à la suite.\n\nLes langues disponibles sont : %s.", wordReferenceLanguagesDoc),
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, _ map[string]interface{}) (err error) {
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, args []string, _ map[string]interface{}) (err error) {
 			if len(args) < 3 {
-				return lib.Help(bot, chatID, WordReferenceCommand())
+				return bot.Help(chatID, "wordreference")
 			}
 			from := args[0]
 			to := args[1]
 			search := strings.Join(args[2:], " ")
 
 			if _, exists := wordReferenceLanguages[from]; !exists {
-				return lib.Error(bot, chatID, "La langue source est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
+				return bot.Error(chatID, "La langue source est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
 			}
 
 			if _, exists := wordReferenceLanguages[to]; !exists {
-				return lib.Error(bot, chatID, "La langue cible est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
+				return bot.Error(chatID, "La langue cible est invalide. Veuillez choisir parmi "+wordReferenceLanguagesDoc)
 			}
 
 			response, err := http.Get(fmt.Sprintf("%s/%s%s/%s", WordReferenceUrl, from, to, search))
@@ -42,10 +42,10 @@ func WordReferenceCommand() lib.Command {
 			defer response.Body.Close()
 
 			if response.StatusCode == 404 {
-				return lib.Error(bot, chatID, "La combinaison de langues est inconnue.")
+				return bot.Error(chatID, "La combinaison de langues est inconnue.")
 			}
 			if response.StatusCode != 200 {
-				return lib.Error(bot, chatID, "Une erreur inconnue s'est produite lors de la recherche dans le dictionnaire.")
+				return bot.Error(chatID, "Une erreur inconnue s'est produite lors de la recherche dans le dictionnaire.")
 			}
 
 			document, err := goquery.NewDocumentFromReader(response.Body)
@@ -75,7 +75,7 @@ func WordReferenceCommand() lib.Command {
 
 			selection := document.Find("table.WRD tbody tr:not(.wrtopsection,.langHeader)")
 			if selection.Length() == 0 {
-				return lib.Error(bot, chatID, "Aucune traduction trouvée pour ce terme ou cette expression.")
+				return bot.Error(chatID, "Aucune traduction trouvée pour ce terme ou cette expression.")
 			}
 
 			selection.Each(func(_ int, element *goquery.Selection) {

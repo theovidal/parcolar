@@ -62,7 +62,7 @@ func SearchParcoursup(query string) (result ParcoursupResponse, err error) {
 		}),
 		nil,
 	)
-	response, err := lib.DoRequest(request)
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return
 	}
@@ -78,7 +78,7 @@ func SearchParcoursup(query string) (result ParcoursupResponse, err error) {
 }
 
 // ParcoursupCommand processes an inline query from a user and returns the results for them to choose from
-func ParcoursupCommand(bot *telegram.BotAPI, update *telegram.Update) (err error) {
+func ParcoursupCommand(bot *lib.Bot, update *telegram.Update) (err error) {
 	response, err := SearchParcoursup(update.InlineQuery.Query)
 	if err != nil {
 		return

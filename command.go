@@ -8,40 +8,11 @@ import (
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/theovidal/parcolar/info"
 	"github.com/theovidal/parcolar/lib"
-	"github.com/theovidal/parcolar/math"
-	"github.com/theovidal/parcolar/pronote"
-	"github.com/theovidal/parcolar/wolfram"
 )
 
-// commandsList stores the commands available on the Telegram bot
-var commandsList = map[string]lib.Command{
-	// ―――――― Default ――――――
-	"help":  HelpCommand(),
-	"start": HelpCommand(),
-
-	// ―――――― Information ――――――
-	"definition":    info.DefinitionCommand(),
-	"translate":     info.TranslateCommand(),
-	"wordreference": info.WordReferenceCommand(),
-
-	"wolfram": wolfram.Command(),
-
-	// ―――――― Mathematics ――――――
-	"calc":  math.CalcCommand(),
-	"latex": math.LatexCommand(),
-	"plot":  math.PlotCommand(),
-
-	// ―――――― PRONOTE ――――――
-	"contents":       pronote.ContentsCommand(),
-	"homework":       pronote.HomeworkCommand(),
-	"timetable":      pronote.TimetableCommand(),
-	"timetablechart": pronote.TimetableChartCommand(),
-}
-
 // HandleCommand parses an incoming request to execute a bot command
-func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool) (err error) {
+func HandleCommand(bot *lib.Bot, update telegram.Update, isCallback bool) (err error) {
 	var commandName string
 	var args []string
 	var chatID int64
@@ -59,15 +30,15 @@ func HandleCommand(bot *telegram.BotAPI, update telegram.Update, isCallback bool
 		chatID = update.Message.Chat.ID
 	}
 
-	command, exists := commandsList[commandName]
+	command, exists := bot.Commands[commandName]
 	if !exists {
-		return lib.Error(bot, chatID, "Oups, il semble que cette commande soit inconnue!")
+		return bot.Error(chatID, "Oups, il semble que cette commande soit inconnue!")
 	}
 
 	var flags map[string]interface{}
 	args, flags, err = ParseFlags(args, command.Flags)
 	if err != nil {
-		return lib.Error(bot, chatID, err.Error())
+		return bot.Error(chatID, err.Error())
 	}
 
 	return command.Execute(bot, &update, chatID, args, flags)

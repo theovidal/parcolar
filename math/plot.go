@@ -9,13 +9,13 @@ import (
 	"github.com/vdobler/chart"
 
 	"github.com/theovidal/parcolar/lib"
-	"github.com/theovidal/parcolar/math/data"
+	"github.com/theovidal/parcolar/math/src"
 )
 
 func PlotCommand() lib.Command {
 	return lib.Command{
 		Name:        "plot",
-		Description: fmt.Sprintf("Tracer des graphiques riches et personnalisés. Vous pouvez tracer plusieurs fonctions en séparant leurs expressions par une esperluette `&`.\n%s\n\n%s", data.DataDocumentation, data.CalcDisclaimer),
+		Description: fmt.Sprintf("Tracer des graphiques riches et personnalisés. Vous pouvez tracer plusieurs fonctions en séparant leurs expressions par une esperluette `&`.\n%s\n\n%s", src.DataDocumentation, src.CalcDisclaimer),
 		Flags: map[string]lib.Flag{
 			"x_min":   {"Valeur minimale de `x` à afficher", -10.0, nil},
 			"x_max":   {"Valeur maximale de `x` à afficher", 10.0, nil},
@@ -30,9 +30,9 @@ func PlotCommand() lib.Command {
 
 			"grid": {"Afficher la grille sur le graphique (0 ou 1)", true, nil},
 		},
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) error {
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) error {
 			if len(args) == 0 {
-				return lib.Help(bot, chatID, PlotCommand())
+				return bot.Help(chatID, "plot")
 			}
 
 			grid := flags["grid"].(bool)
@@ -66,11 +66,11 @@ func PlotCommand() lib.Command {
 			}
 
 			for _, function := range functions {
-				if err := data.CheckExpression(function); err != nil {
-					return lib.Error(bot, chatID, err.Error())
+				if err := src.CheckExpression(function); err != nil {
+					return bot.Error(chatID, err.Error())
 				}
-				if _, err := data.Evaluate(function, 1); err != nil {
-					return lib.Error(bot, chatID, err.Error())
+				if _, err := src.Evaluate(function, 1); err != nil {
+					return bot.Error(chatID, err.Error())
 				}
 			}
 
@@ -81,19 +81,19 @@ func PlotCommand() lib.Command {
 			colorNumber := 0
 			for _, function := range functions {
 				current := strings.TrimSpace(function)
-				if colorNumber == len(lib.PlotColors) {
+				if colorNumber == len(src.PlotColors) {
 					colorNumber = 0
 				}
-				style.LineColor = lib.PlotColors[colorNumber]
+				style.LineColor = src.PlotColors[colorNumber]
 				colorNumber++
 
 				plot.AddFunc(current, func(x float64) float64 {
-					value, _ := data.Evaluate(current, x)
+					value, _ := src.Evaluate(current, x)
 					return value
 				}, chart.PlotStyleLines, style)
 			}
 
-			file := lib.Plot(&plot, "function_plot")
+			file := src.Plot(&plot, "function_plot")
 			photo := telegram.NewPhotoUpload(chatID, file)
 			_, err := bot.Send(photo)
 			if err != nil {

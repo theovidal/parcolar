@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/theovidal/parcolar/lib"
+	"github.com/go-redis/redis/v8"
 )
 
 // Response holds the data from Pronote
@@ -37,7 +37,7 @@ type Data struct {
 }
 
 // MakeRequest executes a GraphQL query to the Pronote API
-func MakeRequest(query string) (Response, error) {
+func MakeRequest(cache *redis.Client, query string) (Response, error) {
 	request, _ := http.NewRequest(
 		"POST",
 		os.Getenv("PRONOTE_API")+"/graphql",
@@ -48,10 +48,10 @@ func MakeRequest(query string) (Response, error) {
 
 	for i := 0; i < 3; i++ {
 		var result Response
-		token := lib.Cache.Get(context.Background(), "token").Val()
+		token := cache.Get(context.Background(), "token").Val()
 		request.Header.Set("Token", token)
 
-		response, err := lib.DoRequest(request)
+		response, err := http.DefaultClient.Do(request)
 		if err != nil {
 			return Response{}, err
 		}
@@ -67,7 +67,7 @@ func MakeRequest(query string) (Response, error) {
 			return result, nil
 		}
 
-		err = Login()
+		err = Login(cache)
 		if err != nil {
 			return Response{}, err
 		}
@@ -77,7 +77,7 @@ func MakeRequest(query string) (Response, error) {
 }
 
 // Login uses user's credentials to get an API token
-func Login() error {
+func Login(cache *redis.Client) error {
 	query, _ := json.Marshal(map[string]string{
 		"url":      os.Getenv("PRONOTE_SERVER"),
 		"cas":      os.Getenv("PRONOTE_CAS"),
@@ -92,7 +92,7 @@ func Login() error {
 	)
 
 	request.Header.Add("Content-Type", "application/json")
-	response, err := lib.DoRequest(request)
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func Login() error {
 	var result Response
 	_ = json.Unmarshal(bytes, &result)
 
-	lib.Cache.Set(context.Background(), "token", result.Token, 0)
+	cache.Set(context.Background(), "token", result.Token, 0)
 
 	return nil
 }

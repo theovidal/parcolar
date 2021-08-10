@@ -1,25 +1,26 @@
 package lib
 
 import (
+	"net/url"
 	"regexp"
 
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/joho/godotenv"
 )
 
-// Help sends a formatted help message in the Telegram chat
-func Help(bot *telegram.BotAPI, chatID int64, command Command) (err error) {
-	help := telegram.NewMessage(chatID, command.Help())
-	help.ParseMode = "Markdown"
-	_, err = bot.Send(help)
-	return
+// LoadEnv loads all the environment variables stored in a .env file
+func LoadEnv(path string) {
+	_ = godotenv.Load(path)
 }
 
-// Error sends a formatted error message in the Telegram chat
-func Error(bot *telegram.BotAPI, chatID int64, message string) (err error) {
-	msg := telegram.NewMessage(chatID, "❌ "+message)
-	msg.ParseMode = "Markdown"
-	_, err = bot.Send(msg)
-	return
+// EncodeURL parses an URL with its query parameters
+func EncodeURL(input string, params map[string]string) string {
+	url, _ := url.Parse(input)
+	query := url.Query()
+	for key, value := range params {
+		query.Set(key, value)
+	}
+	url.RawQuery = query.Encode()
+	return url.String()
 }
 
 // ParseTelegramMessage escapes all the characters required to print MarkdownV2 content

@@ -11,7 +11,9 @@ import (
 
 	"github.com/theovidal/parcolar/info"
 	"github.com/theovidal/parcolar/lib"
+	"github.com/theovidal/parcolar/math"
 	"github.com/theovidal/parcolar/pronote"
+	"github.com/theovidal/parcolar/wolfram"
 )
 
 func main() {
@@ -22,9 +24,37 @@ func main() {
 	lib.OpenDirs()
 	defer os.RemoveAll(lib.TempDir)
 
-	bot, err := telegram.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
+	api, err := telegram.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
 	if err != nil {
 		log.Panic(err)
+	}
+
+	bot := &lib.Bot{
+		BotAPI: api,
+		Commands: map[string]lib.Command{
+			// ―――――― Default ――――――
+			"help":  HelpCommand(),
+			"start": HelpCommand(),
+
+			// ―――――― Information ――――――
+			"definition":    info.DefinitionCommand(),
+			"translate":     info.TranslateCommand(),
+			"wordreference": info.WordReferenceCommand(),
+
+			"wolfram": wolfram.Command(),
+
+			// ―――――― Mathematics ――――――
+			"calc":  math.CalcCommand(),
+			"latex": math.LatexCommand(),
+			"plot":  math.PlotCommand(),
+
+			// ―――――― PRONOTE ――――――
+			"contents":       pronote.ContentsCommand(),
+			"homework":       pronote.HomeworkCommand(),
+			"timetable":      pronote.TimetableCommand(),
+			"timetablechart": pronote.TimetableChartCommand(),
+		},
+		Cache: lib.OpenCache(),
 	}
 
 	if os.Getenv("DEBUG") == "true" {

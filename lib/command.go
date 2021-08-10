@@ -16,7 +16,7 @@ type Command struct {
 	// The list of flags that can be passed by the user
 	Flags map[string]Flag
 	// The command actions
-	Execute func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) error
+	Execute func(bot *Bot, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) error
 }
 
 // Help generates the help string for the command

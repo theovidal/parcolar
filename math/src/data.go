@@ -1,4 +1,4 @@
-package data
+package src
 
 import (
 	"errors"
@@ -6,6 +6,9 @@ import (
 
 	"github.com/Knetic/govaluate"
 )
+
+// Colors defines the colors that can be used in LaTeX outputs (using the `xcolor` package)
+var Colors = []string{"red", "green", "blue", "cyan", "magenta", "yellow", "black", "gray", "white", "darkgray", "lightgray", "brown", "lime", "olive", "orange", "pink", "purple", "teal", "violet"}
 
 var Constants = map[string]interface{}{
 	"e":   math.E,

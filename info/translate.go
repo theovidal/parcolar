@@ -36,20 +36,20 @@ func TranslateCommand() lib.Command {
 		Flags: map[string]lib.Flag{
 			"source": {"Manuellement inscrire la langue source", "", nil},
 		},
-		Execute: func(bot *telegram.BotAPI, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) (err error) {
+		Execute: func(bot *lib.Bot, update *telegram.Update, chatID int64, args []string, flags map[string]interface{}) (err error) {
 			if len(args) < 2 {
-				return lib.Help(bot, chatID, TranslateCommand())
+				return bot.Help(chatID, "translate")
 			}
 			from := strings.ToUpper(flags["source"].(string))
 			to := strings.ToUpper(args[0])
 			text := strings.Join(args[1:], " ")
 
 			if _, exists := sourceLanguages[from]; !exists && from != "" {
-				return lib.Error(bot, chatID, "La langue source est invalide. Veuillez choisir parmi "+sourceLanguagesDoc)
+				return bot.Error(chatID, "La langue source est invalide. Veuillez choisir parmi "+sourceLanguagesDoc)
 			}
 
 			if _, exists := targetLanguages[to]; !exists {
-				return lib.Error(bot, chatID, "La langue cible est invalide. Veuillez choisir parmi "+targetLanguagesDoc)
+				return bot.Error(chatID, "La langue cible est invalide. Veuillez choisir parmi "+targetLanguagesDoc)
 			}
 
 			request, _ := http.NewRequest(
@@ -63,7 +63,7 @@ func TranslateCommand() lib.Command {
 				nil,
 			)
 
-			response, err := lib.DoRequest(request)
+			response, err := http.DefaultClient.Do(request)
 			if err != nil {
 				return
 			}
