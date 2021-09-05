@@ -15,25 +15,19 @@ type Subject struct {
 
 // Subjects holds the list of all available subjects in Pronote
 var Subjects = map[string]Subject{
-	// Core curriculum
-	"HISTOIRE & GEOGRAPHIE":             {Name: "Histoire-Géographie", Emoji: "🌎"},
-	"ENS. MORAL & CIVIQUE":              {Name: "EMC", Emoji: "🏛"},
-	"SC PHYSIQ & CHIMIQ":                {Name: "Sciences physiques", Emoji: "🔭"},
-	"SCIENCES DE LA VIE ET DE LA TERRE": {Name: "SVT", Emoji: "☘"},
-	"ED.PHYSIQUE & SPORT.":              {Name: "EPS", Emoji: "⚽"},
-	"PHILOSOPHIE":                       {Name: "Philosophie", Emoji: "✒"},
-	"PARCOURS REUSSITE ORIENT":          {Name: "MAP PRO (Vie de classe)", Emoji: "🪑"},
+	"MATHÉMATIQUES":        {Name: "Mathématiques", Emoji: "🔢"},
+	"PHYSIQUE":                {Name: "Sciences physiques", Emoji: "🔭"},
+	"INFO COURS":     {Name: "Informatique", Emoji: "💻"},
+	"INFO TP":        {Name: "Informatique (TP)", Emoji: "🖥"},
 
-	// Living languages
+	"FRANÇAIS PHILO": {Name: "Français/Philo", Emoji: "✒"},
 	"ANGLAIS":            {Name: "Anglais", Emoji: "🍵"},
 	"ESPAGNOL":           {Name: "Espagnol", Emoji: "🌮"},
-	"DNL SI":             {Name: "Anglais Euro", Emoji: "🇪🇺"},
-	"ANGLAIS SECT.EUROP": {Name: "Anglais Euro", Emoji: "🇪🇺"},
 
-	// Specialties and options
-	"MATHEMATIQUES":        {Name: "Mathématiques", Emoji: "🔢"},
-	"MATHS EXP":            {Name: "Maths expertes", Emoji: "🧮"},
-	"SC.INGEN. & SC.PHYS.": {Name: "Sciences de l'ingénieur", Emoji: "⚙"},
+	"SCIENCES INGÉNIEUR": {Name: "Sciences de l'ingénieur", Emoji: "⚙"},
+	"SC ING TD": {Name: "Sciences de l'ingénieur (TD)", Emoji: "⚙"},
+
+	"DEVOIRS": {Name: "Devoir surveillé", Emoji: "✏"},
 }
 
 // File stores a document attached to homework or contents

@@ -31,9 +31,10 @@ func (lesson *Lesson) String() (output string) {
 		emoji = "🕑"
 	}
 	output += fmt.Sprintf(
-		"%s *%s: %s* \\(%s\\)",
+		"%s *%s\\-%s: %s* \\(%s\\)",
 		emoji,
 		time.Unix(int64(lesson.From/1000), 0).Format("15h04"),
+		time.Unix(int64(lesson.To/1000), 0).Format("15h04"),
 		lib.ParseTelegramMessage(Subjects[lesson.Subject].Name),
 		lib.ParseTelegramMessage(lesson.Teacher),
 	)
